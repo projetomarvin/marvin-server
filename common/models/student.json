@@ -1,0 +1,48 @@
+{
+  "name": "student",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "activityNumber": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
+    "coins": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
+    "XPPoints": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    }
+  },
+  "validations": [],
+  "relations": {
+    "course": {
+      "type": "belongsTo",
+      "model": "course",
+      "foreignKey": ""
+    },
+    "studentActivities": {
+      "type": "hasMany",
+      "model": "studentActivity",
+      "foreignKey": ""
+    }
+  },
+  "acls": [
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "checkRepository"
+    }
+  ],
+  "methods": {}
+}

@@ -1,0 +1,37 @@
+{
+  "name": "studentActivity",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "startedAt": {
+      "type": "date"
+    },
+    "finishedAt": {
+      "type": "date"
+    },
+    "correctionGrade": {
+      "type": "number"
+    },
+    "autocorrectionGrade": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "student": {
+      "type": "belongsTo",
+      "model": "student",
+      "foreignKey": ""
+    },
+    "activities": {
+      "type": "hasOne",
+      "model": "activity",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

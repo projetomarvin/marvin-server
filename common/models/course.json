@@ -1,0 +1,36 @@
+{
+  "name": "course",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "students": {
+      "type": "hasMany",
+      "model": "student",
+      "foreignKey": "",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "activities": {
+      "type": "hasMany",
+      "model": "activity",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
