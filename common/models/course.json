@@ -29,6 +29,11 @@
       "type": "hasMany",
       "model": "activity",
       "foreignKey": ""
+    },
+    "supportContents": {
+      "type": "hasAndBelongsToMany",
+      "model": "supportContent",
+      "foreignKey": ""
     }
   },
   "acls": [],

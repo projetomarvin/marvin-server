@@ -46,7 +46,7 @@ const exercicios = {
         tests: [
           {
             param: ["Alpha", 1233],
-            output: "Alpha\n1233"
+            output: "Alpha, 1233"
           }
         ]
       },

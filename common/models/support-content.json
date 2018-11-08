@@ -1,45 +1,31 @@
 {
-  "name": "activity",
+  "name": "supportContent",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "name": {
+    "title": {
       "type": "string",
       "required": true
     },
     "createdAt": {
-      "type": "date",
-      "required": false
+      "type": "date"
     },
-    "PDFurl": {
+    "text": {
       "type": "string",
       "required": true
     },
-    "description": {
+    "HTMLText": {
       "type": "string"
-    },
-    "exercises": {
-      "type": [
-        "object"
-      ]
-    },
-    "correctionFunction": {
-      "type": "any"
     }
   },
   "validations": [],
   "relations": {
-    "course": {
-      "type": "belongsTo",
+    "courses": {
+      "type": "hasAndBelongsToMany",
       "model": "course",
-      "foreignKey": ""
-    },
-    "studentActivity": {
-      "type": "hasMany",
-      "model": "studentActivity",
       "foreignKey": ""
     }
   },

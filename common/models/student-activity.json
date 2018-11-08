@@ -27,7 +27,7 @@
       "foreignKey": ""
     },
     "activities": {
-      "type": "hasOne",
+      "type": "belongsTo",
       "model": "activity",
       "foreignKey": ""
     }
