@@ -54,9 +54,5 @@
   "supportContent": {
     "dataSource": "mongodb",
     "public": true
-  },
-  "githubLink": {
-    "dataSource": "mongodb",
-    "public": true
   }
 }

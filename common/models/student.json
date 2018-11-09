@@ -20,6 +20,9 @@
       "type": "number",
       "required": true,
       "default": 0
+    },
+    "githubAccessToken": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -42,6 +45,13 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "checkRepository"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "pushToGit"
     }
   ],
   "methods": {}

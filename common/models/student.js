@@ -34,20 +34,111 @@ module.exports = function(Student) {
     http: {path: '/:id/checkRepository', verb: 'get'},
   });
 
-  Student.afterRemote('checkRepository', async function(ctx, data, next) {
+  Student.afterRemote('checkRepository', async function(ctx, data) {
     const StudentActivity = Student.app.models.StudentActivity;
     const Course = Student.app.models.Course;
     if (data !== 'not found') {
-      console.log(data.id, data.owner.login);
+      // console.log(data.id, data.owner.login);
       const usr = await Student.findById(data.id);
-      const course = await Course.findById(usr.courseId, {include: "activities"});
+      const course = await Course.findById(usr.courseId, {
+        include: 'activities',
+      });
       const activities = course.toJSON().activities;
-      console.log(usr, activities);
+      // console.log(usr, activities);
       usr.activityNumber = 1;
       usr.username = data.owner.login;
       usr.save();
-      StudentActivity.create({studentId: data.id, activityId:  activities[1].id, createdAt: moment().toDate()});
+      StudentActivity.create({
+        studentId: data.id,
+        activityId: activities[1].id,
+        createdAt: moment().toDate(),
+      });
       return;
     }
+  });
+
+  Student.beforeRemote('prototype.patchAttributes', function(ctx, data, next) {
+    if (ctx.req.body.githubAccessToken) {
+      axios
+        .post('https://github.com/login/oauth/access_token', {
+          client_id: '71f8116e373c16f3eb11',
+          client_secret: '963642187139722787a001456c34002985a9f22c',
+          code: ctx.req.body.githubAccessToken,
+        })
+        .then(r => {
+          const token = r.data.split('=')[1].split('&')[0];
+          if (token !== 'bad_verification_code') {
+            ctx.req.body.githubAccessToken = token;
+            next();
+          } else {
+            const err = new Error();
+            err.status = 500;
+            next(err);
+          }
+        });
+    } else {
+      next();
+    }
+  });
+
+  function gitPush(usr, data, sha) {
+    axios
+      .put(
+        `https://api.github.com/repos/${usr.username}/marvin/contents/${
+          data.path
+        }`,
+        {
+          content: data.content,
+          message: data.message,
+          sha,
+        },
+        {
+          headers: {
+            Authorization: 'token ' + usr.githubAccessToken,
+          },
+        }
+      )
+      .then(r => console.log(r.data))
+      .catch(e => console.log('ERROR', e.response.data));
+  }
+
+  Student.pushToGit = async function(data, id, cb) {
+    const usr = await Student.findById(id);
+    axios(
+      `https://api.github.com/repos/${usr.username}/marvin/contents/${
+        data.path
+      }`,
+      {
+        headers: {
+          Authorization: 'token ' + usr.githubAccessToken,
+        },
+      }
+    )
+      .then(r => {
+        gitPush(usr, data, r.data.sha)
+      })
+      .catch(err => {
+        if (err.response.status === 404) gitPush(usr, data);
+        else console.log(err.response);
+      });
+  };
+
+  Student.remoteMethod('pushToGit', {
+    accepts: [
+      {
+        arg: 'data',
+        type: 'object',
+        http: {source: 'body'},
+        required: true,
+      },
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'pushes content to saveGithub',
+    http: {path: '/:id/pushToGit', verb: 'post'},
   });
 };
