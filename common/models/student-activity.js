@@ -37,6 +37,7 @@ module.exports = function(Studentactivity) {
       );
       return data;
     } catch (e) {
+      console.log(e);
       const file = e.response.request.path.split('?')[0].split('/');
       const err = new Error();
       err.statusCode = 404;
