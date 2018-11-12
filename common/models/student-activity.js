@@ -52,6 +52,17 @@ module.exports = function(Studentactivity) {
     http: {path: '/:id/checkFiles', verb: 'get'},
   });
 
+  Studentactivity.beforeRemote('finish', async function(ctx, data) {
+    const id = ctx.req.params.id;
+    const stActiity = await Studentactivity.findById(id);
+    if (stActiity.finishedAt) {
+      const err = new Error();
+      err.message = "atividade já finalizada"
+      throw err;
+    }
+    return;
+  })
+
   Studentactivity.finish = async function(id) {
     const Activity = Studentactivity.app.models.Activity;
     const students = Studentactivity.app.models.Student;
