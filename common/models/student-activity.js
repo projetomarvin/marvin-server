@@ -55,9 +55,12 @@ module.exports = function(Studentactivity) {
   Studentactivity.finish = async function(id) {
     const Activity = Studentactivity.app.models.Activity;
     const students = Studentactivity.app.models.Student;
+    const courses = Studentactivity.app.models.Course;
     const stActiity = await Studentactivity.findById(id);
     const stu = await students.findById(stActiity.studentId);
     const Act = await Activity.findById(stActiity.activityId);
+    const course = await courses.findById(stu.courseId, {include: 'students'});
+    const sts = course.toJSON().students;
     let path = Act.exercises[0].file.split('/');
     path.splice(-1, 1);
     path = path.join('/');
@@ -98,6 +101,17 @@ module.exports = function(Studentactivity) {
         // console.log(err, result);
       }
     );
+    let n = Math.floor(Math.random()*sts.length);
+    let corrector;
+    while (sts[n].id === stActiity.studentId) {
+      n = Math.floor(Math.random()*sts.length);
+    };
+    console.log(sts[n]);
+    return {
+      filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`,
+      corrector: sts[n],
+    };
+
   };
 
   Studentactivity.remoteMethod('finish', {
@@ -105,22 +119,4 @@ module.exports = function(Studentactivity) {
     returns: {arg: 'events', root: true},
     http: {path: '/:id/finish', verb: 'put'},
   });
-
-  Studentactivity.afterRemote('finish', async function (ctx, data) {
-    const id = ctx.req.params.id;
-    const courses = Studentactivity.app.models.Course;
-    const students = Studentactivity.app.models.Student;
-    const stActiity = await Studentactivity.findById(id);
-    const stu = await students.findById(stActiity.studentId);
-    const course = await courses.findById(stu.courseId, {include: 'students'});
-    console.log(course.toJSON().students, stu);
-    const sts = course.toJSON().students;
-    let n = Math.floor(Math.random()*sts.length);
-    let corrector;
-    while (sts[n].id === stActiity.studentId) {
-      n = Math.floor(Math.random()*sts.length);
-    };
-    console.log(sts[n]);
-    return {filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`};
-  })
 };
