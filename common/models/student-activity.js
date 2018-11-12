@@ -108,8 +108,6 @@ module.exports = function(Studentactivity) {
       },
       (err, result) => {
         fs.unlinkSync(`${folder}/${id}.zip`);
-        stActiity.finishedAt = moment();
-        stActiity.save();
         // console.log(err, result);
       }
     );
@@ -119,6 +117,9 @@ module.exports = function(Studentactivity) {
       n = Math.floor(Math.random()*sts.length);
     };
     console.log(sts[n]);
+    stActiity.correctorId = sts[n].id;
+    stActiity.finishedAt = moment();
+    stActiity.save();
     return {
       filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`,
       corrector: sts[n],
