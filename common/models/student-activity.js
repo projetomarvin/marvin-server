@@ -73,14 +73,18 @@ module.exports = function(Studentactivity) {
     const course = await courses.findById(stu.courseId, {include: 'students'});
     const sts = course.toJSON().students;
     let path = Act.exercises[0].file.split('/');
-    path.splice(-1, 1);
-    path = path.join('/');
+    path = path[0];
     // const folder = '/home/ubuntu/activityFiles'
     const folder = '/home/dante/Documents'
     await fs.mkdirSync(`${folder}/${id}`);
     await fs.mkdirSync(`${folder}/${id}/${path}`);
     const files = await Promise.all(
       Act.exercises.map(async r => {
+        let path2 = r.file.split('/');
+        path2.splice(-1, 1);
+        path2 = path2.join('/');
+        console.log(path2);
+        exec(`mkdir ${folder}/${id}/${path2}`);
         const file = await axios(
           `https://api.github.com/repos/${stu.username}/marvin/contents/` +
             r.file +
