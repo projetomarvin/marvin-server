@@ -1,7 +1,8 @@
-const fs = require("fs");
-const safeEval = require("safe-eval");
-var Sandbox = require("sandbox"),
-  s = new Sandbox();
+'use strict';
+const fs = require('fs');
+const safeEval = require('safe-eval');
+const Sandbox = require('sandbox');
+const s = new Sandbox();
 
 // (function() {
 //   if (!console) {
@@ -16,14 +17,15 @@ var Sandbox = require("sandbox"),
 module.exports = function(level, param) {
   const output = [];
   let r;
-  let file = fs.readFileSync(level, "utf-8");
-  file = file.replace(/\n/g, " ");
+  let file = fs.readFileSync(level, 'utf-8');
+  file = file.replace(/\n/g, ' ');
   // file = file.replace(/console.log/g, "print");
-  file = "(" + file + ")()";
-  console.log("file:", file);
+  // file = '(' + file + ')()';
+  console.log('file:', file);
   s.run(file, o => {
-    r = o
+    r = o;
   });
   const res = safeEval(file);
-  console.log(res, r);
+  console.log(res);
+  // return {output: r, result: res};
 };
