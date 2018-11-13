@@ -77,9 +77,9 @@ module.exports = function(Studentactivity) {
     path = path[0];
     fs.stat('/home/ubuntu/activityFiles', function (err, stats) {
       if (err) {
-        folder = '/home/dante/Documents'
+        folder = '/home/dante/Documents';
       } else {
-        folder = '/home/ubuntu/activityFiles'
+        folder = '/home/ubuntu/activityFiles';
       }
     })
     else folder = '/home/dante/Documents';
