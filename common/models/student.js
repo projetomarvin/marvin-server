@@ -1,6 +1,10 @@
 'use strict';
 const axios = require('axios');
 const moment = require('moment');
+const sgMail = require('@sendgrid/mail');
+
+const sgKey =
+  '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';
 
 module.exports = function(Student) {
   Student.beforeRemote('login', function(ctx, data, next) {
@@ -140,5 +144,19 @@ module.exports = function(Student) {
     returns: {root: true},
     description: 'pushes content to saveGithub',
     http: {path: '/:id/pushToGit', verb: 'post'},
+  });
+
+  Student.on('resetPasswordRequest', function(info) {
+    const token = info.accessToken.id;
+    sgMail.setApiKey(sgKey);
+    const msg = {
+      to: info.email,
+      from: 'contato@projetomarvin.com',
+      subject: 'Recuperação de senha',
+      html: `<p>Olá, você solicitou uma nova senha.<br/>
+          <a href=https://app.projetomarvin.com/reset-password.html?${token}>Clique aqui</a> para criar sua nova senha!</p>`,
+    };
+    console.log(msg);
+    sgMail.send(msg);
   });
 };
