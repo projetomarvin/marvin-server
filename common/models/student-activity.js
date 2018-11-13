@@ -2,7 +2,7 @@
 const moment = require('moment');
 const axios = require('axios');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 const AWS = require('aws-sdk');
 const credentials = new AWS.SharedIniFileCredentials({profile: 'cori'});
 AWS.config.region = 'sa-east-1';
@@ -72,10 +72,11 @@ module.exports = function(Studentactivity) {
     const Act = await Activity.findById(stActiity.activityId);
     const course = await courses.findById(stu.courseId, {include: 'students'});
     const sts = course.toJSON().students;
+    let folder;
     let path = Act.exercises[0].file.split('/');
     path = path[0];
-    // const folder = '/home/ubuntu/activityFiles'
-    const folder = '/home/dante/Documents'
+    if (fs.exists('/home/ubuntu/activityFiles')) folder = '/home/ubuntu/activityFiles';
+    else folder = '/home/dante/Documents';
     await fs.mkdirSync(`${folder}/${id}`);
     await fs.mkdirSync(`${folder}/${id}/${path}`);
     const files = await Promise.all(
@@ -83,8 +84,7 @@ module.exports = function(Studentactivity) {
         let path2 = r.file.split('/');
         path2.splice(-1, 1);
         path2 = path2.join('/');
-        console.log(path2);
-        exec(`mkdir ${folder}/${id}/${path2}`);
+        const exe = await execSync(`mkdir ${folder}/${id}/${path2}`);
         const file = await axios(
           `https://api.github.com/repos/${stu.username}/marvin/contents/` +
             r.file +
@@ -100,7 +100,7 @@ module.exports = function(Studentactivity) {
         );
       })
     );
-    exec(`zip ${folder}/${id}.zip ${folder}/${id}`);
+    await execSync(`zip ${folder}/${id}.zip ${folder}/${id}`);
     exec(`rm -rf ${folder}/${id}`);
     const file = await fs.readFileSync(`${folder}/${id}.zip`);
     s3.upload(
