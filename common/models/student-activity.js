@@ -75,7 +75,13 @@ module.exports = function(Studentactivity) {
     let folder;
     let path = Act.exercises[0].file.split('/');
     path = path[0];
-    if (fs.exists('/home/ubuntu/activityFiles')) folder = '/home/ubuntu/activityFiles';
+    fs.stat('/home/ubuntu/activityFiles', function (err, stats) {
+      if (err) {
+        folder = '/home/dante/Documents'
+      } else {
+        folder = '/home/ubuntu/activityFiles'
+      }
+    })
     else folder = '/home/dante/Documents';
     await fs.mkdirSync(`${folder}/${id}`);
     await fs.mkdirSync(`${folder}/${id}/${path}`);
