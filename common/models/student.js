@@ -159,4 +159,29 @@ module.exports = function(Student) {
     console.log(msg);
     sgMail.send(msg);
   });
+
+  Student.getUsername = async function (id) {
+    const stu =  await Student.findById(id);
+    console.log(stu);
+    if (stu) {
+      return stu.username;
+    } else {
+      const err = new Error();
+      err.status = 500;
+      throw err;
+    }
+  }
+
+  Student.remoteMethod('getUsername', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'gets username from id',
+    http: {path: '/:id/username', verb: 'get'},
+  });
 };
