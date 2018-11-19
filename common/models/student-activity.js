@@ -125,7 +125,7 @@ module.exports = function(Studentactivity) {
       },
       (err, result) => {
         fs.unlinkSync(`${folder}/${id}.zip`);
-        // console.log(err, result);
+        console.log(err, result);
       }
     );
     let n = Math.floor(Math.random() * sts.length);
