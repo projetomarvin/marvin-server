@@ -108,7 +108,7 @@ module.exports = function(Student) {
 
   Student.pushToGit = async function(data, id, cb) {
     const usr = await Student.findById(id);
-    axios(
+    return axios(
       `https://api.github.com/repos/${usr.username}/marvin/contents/${
         data.path
       }`,
@@ -123,7 +123,11 @@ module.exports = function(Student) {
       })
       .catch(err => {
         if (err.response.status === 404) gitPush(usr, data);
-        else console.log(err.response);
+        else if (err.response.status === 401) {
+          const error = new Error('Authorization required');
+          error.statusCode = 401;
+          throw error;
+        } else throw err;
       });
   };
 

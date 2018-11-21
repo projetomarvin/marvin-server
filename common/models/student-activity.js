@@ -136,7 +136,7 @@ module.exports = function(Studentactivity) {
     console.log(sts[n]);
     stActiity.correctorId = sts[n].id;
     stActiity.finishedAt = moment();
-    stActiity.save();
+    // stActiity.save();
     return {
       filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`,
       corrector: sts[n],
