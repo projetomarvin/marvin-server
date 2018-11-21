@@ -15,6 +15,21 @@ module.exports = function(Correction) {
   });
 
   Correction.afterRemote('prototype.patchAttributes', async function (ctx, data) {
-
+    const students = Studentactivity.app.models.Student;
+    const Studentactivity = Studentactivity.app.models.Studentactivity;
+    const stu = await Studentactivity.findById(data.Studentactivity, {
+      include: 'students',
+    });
+    const corr = await students.findById(data.correctorId);
+    console.log(stu.email, corr);
+    const msg = {
+      to: stu.email,
+      from: {
+        email: 'contato@projetomarvin.com',
+        name: 'Marvin',
+      },
+      subject: 'Feedback de correção',
+      html: `<p>`
+    }
   });
 };
