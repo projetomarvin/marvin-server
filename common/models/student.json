@@ -36,6 +36,11 @@
       "type": "hasMany",
       "model": "studentActivity",
       "foreignKey": ""
+    },
+    "correction": {
+      "type": "belongsTo",
+      "model": "correction",
+      "foreignKey": ""
     }
   },
   "acls": [
