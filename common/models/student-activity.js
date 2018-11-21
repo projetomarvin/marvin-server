@@ -168,7 +168,7 @@ module.exports = function(Studentactivity) {
       <br>
       O link do formulário de correção é <a href="https://docs.google.com/forms/d/e/1FAIpQLSedo-dSfvz8IBYstjStDFcC70YVP13LbHRNkF60KkBM22r4zg/viewform?usp=pp_url&entry.790675438=${
         data.correction.id
-      }&entry.75529854=${data.student.email}" target="_blank">esse aqui</a>
+      }" target="_blank">esse aqui</a>
        e os arquivos estão disponíveis <a href="https://s3-sa-east-1.amazonaws.com/marvin-files/${
          data.activity.id
        }.zip" target="_blank">aqui</a>`,

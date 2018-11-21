@@ -15,9 +15,9 @@ module.exports = function(Correction) {
   });
 
   Correction.afterRemote('prototype.patchAttributes', async function (ctx, data) {
-    const students = Studentactivity.app.models.Student;
-    const Studentactivity = Studentactivity.app.models.Studentactivity;
-    const stu = await Studentactivity.findById(data.Studentactivity, {
+    const students = Correction.app.models.Student;
+    const Studentactivity = Correction.app.models.Studentactivity;
+    const stu = await Studentactivity.findById(data.StudentactivityId, {
       include: 'students',
     });
     const corr = await students.findById(data.correctorId);
