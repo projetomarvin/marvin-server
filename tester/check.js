@@ -1,29 +1,33 @@
 const fs = require('fs');
+const Sandbox = require('sandbox');
+const s = new Sandbox();
 
-module.exports = function(level, param) {
+module.exports = async function(level, param) {
+  let params = param;
+  if (typeof param === 'string') params = "'" + params + "'";
+  else if (Array.isArray(param)) {
+    let arrayParams = '';
+    params.map(p => {
+      if (typeof p === 'string') arrayParams += "'" + p + "',";
+      else arrayParams += p.toString() + ',';
+    });
+    params = arrayParams;
+  }
+  const functionName = level.split('/')[2].split('.')[0];
   let result;
-  const output = [];
-  (function() {
-    if (!console) {
-      console = {};
-    }
-    const old = console.log;
-    print = function(message) {
-      output.push(message);
-    };
-  })();
   let file = fs.readFileSync(level, 'utf-8');
-  file = file.replace(/console.log/g, 'print');
-  file = 'module.exports = {\nfun:' + file + '}';
-  fs.writeFileSync('./' + level.split('/')[1] + '.js', file);
-  const test = require('./' + level.split('/')[1]);
-  if (!param) result = test.fun();
-  else if (typeof param === 'string' || param.length === 1)
-    result = test.fun(param);
-  else if (param.length === 2) result = test.fun(param[0], param[1]);
-  else if (param.length === 3) result = test.fun(param[0], param[1], param[2]);
-  else if (param.length === 4)
-    result = test.fun(param[0], param[1], param[2], param[3]);
-  fs.unlinkSync('./' + level.split('/')[1]);
-  return {output, result};
+  const functionFile = file.match(/(fun.*{[\s\S]*}[\s]*$)/g);
+  if (!functionFile) return "Função inválida!";
+  file = functionFile[0] + '\n ' + functionName + '(' + params + ')';
+  // console.log(file);
+
+  const func = new Promise(resolve => {
+    s.run(file, o => resolve(o));
+  });
+
+  result = await func;
+  result.output = result.console;
+  delete result.console;
+
+  return result;
 };

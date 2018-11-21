@@ -1,9 +1,9 @@
 const check = require('./check3.js');
 
 const exercicios = {
-  etapa01: [
+  fase01: [
     {
-      file: 'etapa01/ex00/mostrarNome.js',
+      file: 'fase01/ex00/mostrarNome.js',
       tests: [
         {
           output: 'Marvin',
@@ -11,7 +11,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa01/ex01/nomeDeVolta.js',
+      file: 'fase01/ex01/nomeDeVolta.js',
       tests: [
         {
           output: 'Marvin',
@@ -20,7 +20,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa01/ex02/qualNome.js',
+      file: 'fase01/ex02/qualNome.js',
       tests: [
         {
           param: 'Zaphod',
@@ -33,7 +33,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa01/ex03/nomes.js',
+      file: 'fase01/ex03/nomes.js',
       tests: [
         {
           param: ['Alpha', 1233],
@@ -42,9 +42,9 @@ const exercicios = {
       ],
     },
   ],
-  etapa02: [
+  fase02: [
     {
-      file: 'etapa02/ex00.js',
+      file: 'fase02/ex00.js',
       tests: [
         {
           param: 'abcdefg',
@@ -61,7 +61,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa02/ex01.js',
+      file: 'fase02/ex01.js',
       tests: [
         {
           param: 'abcdefg',
@@ -78,7 +78,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa02/ex02.js',
+      file: 'fase02/ex02.js',
       tests: [
         {
           param: 'abcdefg',
@@ -95,7 +95,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa02/ex03.js',
+      file: 'fase02/ex03.js',
       tests: [
         {
           param: 'abcdefg',
@@ -112,7 +112,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa02/ex04.js',
+      file: 'fase02/ex04.js',
       tests: [
         {
           param: 'abcdefg',
@@ -129,7 +129,7 @@ const exercicios = {
       ],
     },
     {
-      file: 'etapa02/ex05.js',
+      file: 'fase02/ex05.js',
       tests: [
         {
           param: 'ABCD',
@@ -148,9 +148,9 @@ const exercicios = {
   ],
 };
 // {
-//   etapa03: [
+//   fase03: [
 //     {
-//       file: "etapa03/ex00.js",
+//       file: "fase03/ex00.js",
 //       tests: [
 //         {
 //           result: /^0\.[0-9]{12,20}\w$/i
@@ -158,7 +158,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex01.js",
+//       file: "fase03/ex01.js",
 //       tests: [
 //         {
 //           result: /^1[0-9]|20$/i
@@ -166,7 +166,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex02.js",
+//       file: "fase03/ex02.js",
 //       tests: [
 //         {
 //           param: 12,
@@ -187,7 +187,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex03.js",
+//       file: "fase03/ex03.js",
 //       tests: [
 //         {
 //           param: [1, 4, 9],
@@ -204,7 +204,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex04.js",
+//       file: "fase03/ex04.js",
 //       tests: [
 //         {
 //           param: [4, 1],
@@ -221,7 +221,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex05.js",
+//       file: "fase03/ex05.js",
 //       tests: [
 //         {
 //           param: [4, 244],
@@ -238,7 +238,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex06.js",
+//       file: "fase03/ex06.js",
 //       tests: [
 //         {
 //           param: [4, 4, 4, 4],
@@ -251,7 +251,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex07.js",
+//       file: "fase03/ex07.js",
 //       tests: [
 //         {
 //           param: [44, 4],
@@ -264,7 +264,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa03/ex08.js",
+//       file: "fase03/ex08.js",
 //       tests: [
 //         {
 //           param: 4,
@@ -279,9 +279,9 @@ const exercicios = {
 //   ]
 // },
 // {
-//   etapa04: [
+//   fase04: [
 //     {
-//       file: "etapa04/ex00.js",
+//       file: "fase04/ex00.js",
 //       tests: [
 //         {
 //           param: "A",
@@ -302,7 +302,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex01.js",
+//       file: "fase04/ex01.js",
 //       tests: [
 //         {
 //           param: "A",
@@ -323,7 +323,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex02.js",
+//       file: "fase04/ex02.js",
 //       tests: [
 //         {
 //           param: 0,
@@ -344,7 +344,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex03.js",
+//       file: "fase04/ex03.js",
 //       tests: [
 //         {
 //           param: 0,
@@ -365,7 +365,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex04.js",
+//       file: "fase04/ex04.js",
 //       tests: [
 //         {
 //           param: 0,
@@ -386,7 +386,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex05.js",
+//       file: "fase04/ex05.js",
 //       tests: [
 //         {
 //           param: "dsa",
@@ -407,7 +407,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex06.js",
+//       file: "fase04/ex06.js",
 //       tests: [
 //         {
 //           param: 0,
@@ -428,7 +428,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex07.js",
+//       file: "fase04/ex07.js",
 //       tests: [
 //         {
 //           param: new Date(2013, 2, 1, 1, 10),
@@ -441,7 +441,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex08.js",
+//       file: "fase04/ex08.js",
 //       tests: [
 //         {
 //           param: 0,
@@ -466,7 +466,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa04/ex09.js",
+//       file: "fase04/ex09.js",
 //       tests: [
 //         {
 //           param: "a",
@@ -497,9 +497,9 @@ const exercicios = {
 //   ]
 // },
 // {
-//   etapa05: [
+//   fase05: [
 //     {
-//       file: "etapa05/ex00.js",
+//       file: "fase05/ex00.js",
 //       tests: [
 //         {
 //           result: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -507,7 +507,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex01.js",
+//       file: "fase05/ex01.js",
 //       tests: [
 //         {
 //           param: [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
@@ -525,7 +525,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex02.js",
+//       file: "fase05/ex02.js",
 //       tests: [
 //         {
 //           param: [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
@@ -534,7 +534,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex03.js",
+//       file: "fase05/ex03.js",
 //       tests: [
 //         {
 //           param: [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
@@ -547,7 +547,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex04.js",
+//       file: "fase05/ex04.js",
 //       tests: [
 //         {
 //           param: [[1, 2]],
@@ -560,7 +560,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex05.js",
+//       file: "fase05/ex05.js",
 //       tests: [
 //         {
 //           param: [[1, 2, 430], 2],
@@ -573,7 +573,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex06.js",
+//       file: "fase05/ex06.js",
 //       tests: [
 //         {
 //           param: [[1, 2, 430], [2]],
@@ -586,7 +586,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex07.js",
+//       file: "fase05/ex07.js",
 //       tests: [
 //         {
 //           param: [["a", "b", "c"]],
@@ -599,7 +599,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa05/ex08.js",
+//       file: "fase05/ex08.js",
 //       tests: [
 //         {
 //           param: [["a", "b", "c"]],
@@ -614,9 +614,9 @@ const exercicios = {
 //   ]
 // },
 // {
-//   etapa06: [
+//   fase06: [
 //     {
-//       file: "etapa06/ex00.js",
+//       file: "fase06/ex00.js",
 //       tests: [
 //         {
 //           param: [1, 5],
@@ -629,7 +629,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa06/ex01.js",
+//       file: "fase06/ex01.js",
 //       tests: [
 //         {
 //           param: [1, 5],
@@ -644,7 +644,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa06/ex02.js",
+//       file: "fase06/ex02.js",
 //       tests: [
 //         {
 //           param: [[5, 1, 0, 0, 0]],
@@ -661,7 +661,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa06/ex03.js",
+//       file: "fase06/ex03.js",
 //       tests: [
 //         {
 //           param: "Cavalo",
@@ -681,7 +681,7 @@ const exercicios = {
 //       ]
 //     },
 //     {
-//       file: "etapa06/ex04.js",
+//       file: "fase06/ex04.js",
 //       tests: [
 //         {
 //           param: [["arca", 1, "marvin", ["s"], ""]],
@@ -707,10 +707,10 @@ function arraysEqual(arr1, arr2) {
 }
 
  function runTest(ex) {
-  const etapa = exercicios[ex];
+  const fase = exercicios[ex];
   let certos = 0;
   let errou = false;
-  etapa.map((e, i) => {
+  fase.map((e, i) => {
     e.tests.map(async t => {
       if (!t.output) t.output = '';
       if (!t.result) t.result = null;
