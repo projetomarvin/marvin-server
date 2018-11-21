@@ -54,5 +54,9 @@
   "supportContent": {
     "dataSource": "mongodb",
     "public": true
+  },
+  "correction": {
+    "dataSource": "mongodb",
+    "public": true
   }
 }

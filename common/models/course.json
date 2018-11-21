@@ -34,6 +34,11 @@
       "type": "hasAndBelongsToMany",
       "model": "supportContent",
       "foreignKey": ""
+    },
+    "corrector": {
+      "type": "belongsTo",
+      "model": "correction",
+      "foreignKey": ""
     }
   },
   "acls": [],

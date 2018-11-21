@@ -1,0 +1,29 @@
+{
+  "name": "correction",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "createdAt": {
+      "type": "date",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "studentActivity": {
+      "type": "belongsTo",
+      "model": "studentActivity",
+      "foreignKey": ""
+    },
+    "corrector": {
+      "type": "hasOne",
+      "model": "student",
+      "foreignKey": "correctorId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

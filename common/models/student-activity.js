@@ -4,7 +4,12 @@ const axios = require('axios');
 const fs = require('fs');
 const {exec, execSync} = require('child_process');
 const AWS = require('aws-sdk');
+const sgMail = require('@sendgrid/mail');
+
+const sgKey =
+  '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';
 const credentials = new AWS.SharedIniFileCredentials({profile: 'cori'});
+sgMail.setApiKey(sgKey);
 AWS.config.region = 'sa-east-1';
 AWS.config.credentials = credentials;
 
@@ -73,15 +78,16 @@ module.exports = function(Studentactivity) {
     return;
   });
 
-  Studentactivity.finish = async function(id) {
+  Studentactivity.finish = async function(userId, id) {
+    console.log(userId);
     const Activity = Studentactivity.app.models.Activity;
     const students = Studentactivity.app.models.Student;
     const courses = Studentactivity.app.models.Course;
+    const correction = Studentactivity.app.models.Correction;
     const stActiity = await Studentactivity.findById(id);
     const stu = await students.findById(stActiity.studentId);
     const Act = await Activity.findById(stActiity.activityId);
-    const course = await courses.findById(stu.courseId, {include: 'students'});
-    const sts = course.toJSON().students;
+    const corrector = await students.findById(userId);
     let folder;
     let path = Act.exercises[0].file.split('/');
     path = path[0];
@@ -128,27 +134,61 @@ module.exports = function(Studentactivity) {
         console.log(err, result);
       }
     );
-    let n = Math.floor(Math.random() * sts.length);
-    let corrector;
-    while (sts[n].id === stActiity.studentId) {
-      n = Math.floor(Math.random() * sts.length);
-    }
-    console.log(sts[n]);
-    stActiity.correctorId = sts[n].id;
+    stActiity.correctorId = userId;
     stActiity.finishedAt = moment();
     // stActiity.save();
+    const corr = await correction.create({
+      studentActivityId: id,
+      correctorId: userId,
+      createdAt: moment().toDate(),
+    });
+    console.log(corr);
     return {
       filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`,
-      corrector: sts[n],
+      corrector: corrector,
+      correction: corr,
+      student: stu,
+      activity: stActiity,
     };
   };
 
+  Studentactivity.afterRemote('finish', async function(ctx, data) {
+    const msg = {
+      to: data.corrector.email,
+      from: {
+        email: 'contato@projetomarvin.com',
+        name: 'Marvin',
+      },
+      subject: 'Nova correção',
+      html: `<p>
+      Olá ${data.corrector.username}.
+      <br>
+      <br>
+      Você foi convidado(a) por <b>${data.student.username}</b> para correção.
+      <br>
+      O link do formulário de correção é <a href="https://docs.google.com/forms/d/e/1FAIpQLSedo-dSfvz8IBYstjStDFcC70YVP13LbHRNkF60KkBM22r4zg/viewform?usp=pp_url&entry.790675438=${
+        data.correction.id
+      }&entry.75529854=${data.student.email}" target="_blank">esse aqui</a>
+       e os arquivos estão disponíveis <a href="https://s3-sa-east-1.amazonaws.com/marvin-files/${
+         data.activity.id
+       }.zip" target="_blank">aqui</a>`,
+    };
+    sgMail.send(msg);
+  });
+
   Studentactivity.remoteMethod('finish', {
-    accepts: {
-      arg: 'id',
-      type: 'string',
-      required: true,
-    },
+    accepts: [
+      {
+        arg: 'userId',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
     returns: {
       arg: 'events',
       root: true,
