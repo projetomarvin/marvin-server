@@ -37,7 +37,7 @@ const exercicios = {
       tests: [
         {
           param: ['Alpha', 1233],
-          output: 'Alpha e 1233',
+          result: 'Alpha e 1233',
         },
       ],
     },
