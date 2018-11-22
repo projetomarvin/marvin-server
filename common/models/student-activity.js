@@ -119,7 +119,7 @@ module.exports = function(Studentactivity) {
         );
       })
     );
-    await execSync(`zip ${folder}/${id}.zip ${folder}/${id}`);
+    await execSync(`zip -r ${folder}/${id}.zip ${folder}/${id}`);
     exec(`rm -rf ${folder}/${id}`);
     const file = await fs.readFileSync(`${folder}/${id}.zip`);
     s3.upload(
