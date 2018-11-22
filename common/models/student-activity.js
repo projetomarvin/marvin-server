@@ -91,7 +91,7 @@ module.exports = function(Studentactivity) {
     let folder;
     let path = Act.exercises[0].file.split('/');
     path = path[0];
-    if (await fs.existsSync('/home/ubuntu/activityFiles')) {
+    if (fs.existsSync('/home/ubuntu/activityFiles')) {
       folder = '/home/ubuntu/activityFiles';
     } else {
       folder = '/home/dante/Documents';
@@ -136,7 +136,7 @@ module.exports = function(Studentactivity) {
     );
     stActiity.correctorId = userId;
     stActiity.finishedAt = moment();
-    // stActiity.save();
+    stActiity.save();
     const corr = await correction.create({
       studentActivityId: id,
       correctorId: userId,
