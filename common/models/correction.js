@@ -1,6 +1,9 @@
 'use strict';
 const moment = require('moment');
 const sgMail = require('@sendgrid/mail');
+const axios = require('axios');
+const fs = require('fs');
+const {execSync} = require('child_process');
 const check = require('../../tester/index.js');
 
 const sgKey =
@@ -50,11 +53,51 @@ module.exports = function(Correction) {
     const corr = await Correction.findById(id, {
       include: 'studentActivity',
     });
-    const Act = await Activity.findById(
-      corr.toJSON().studentActivity.activityId
-    );
+    const a = corr.toJSON();
+    const Act = await Activity.findById(a.studentActivity.activityId);
     const levels = Act.exercises.length;
-    const correction = await check.runTest(Act.exercises);
+    const file = await axios({
+      url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${
+        a.studentActivity.id
+      }.zip`,
+      responseType: 'stream',
+    });
+    const writeFile = new Promise(resolve => {
+      file.data.pipe(
+        fs
+          .createWriteStream(
+            __dirname +
+              '/../../../activityFiles/' +
+              a.studentActivity.id +
+              '.zip'
+          )
+          .on('finish', () => {
+            resolve();
+          })
+      );
+    });
+    await writeFile;
+    await execSync(
+      'unzip ' +
+        __dirname +
+        '/../../../activityFiles/' +
+        a.studentActivity.id +
+        ' -d ' +
+        __dirname +
+        '/../../../activityFiles/' +
+        a.studentActivity.id
+    );
+    await execSync(
+      'rm ' +
+        __dirname +
+        '/../../../activityFiles/' +
+        a.studentActivity.id +
+        '.zip'
+    );
+    const correction = await check.runTest(Act.exercises, a.studentActivity.id);
+    await execSync(
+      'rm -rf ' + __dirname + '/../../../activityFiles/' + a.studentActivity.id
+    );
     let lastRight = 0;
     let errou = false;
     let correctionmsg = '';
@@ -74,7 +117,6 @@ module.exports = function(Correction) {
       }
       correctionmsg += '\n';
     });
-    console.log(correctionmsg, lastRight);
     corr.message = correctionmsg;
     corr.grade = lastRight / levels;
     corr.save();
@@ -117,7 +159,8 @@ module.exports = function(Correction) {
       ${finalMsg}
       </p>`,
     };
-    sgMail.send(msg);
+    console.log(msg);
+    // sgMail.send(msg);
   });
 
   Correction.remoteMethod('finishCorrection', {
