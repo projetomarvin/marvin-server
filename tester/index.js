@@ -706,56 +706,22 @@ function arraysEqual(arr1, arr2) {
   return true;
 }
 
-async function runTest(ex) {
-  const r = new Date().getTime();
-  const fase = exercicios[ex];
-  let certos = 0;
-  let errou = false;
-  const run = Promise.all(
-    fase.map(async function(e, i) {
-      const a = Promise.all(
-        e.tests.map(async t => {
-          if (!t.output) t.output = '';
-          if (!t.result) t.result = null;
-          let test = await check(e.file, t.param);
-          if (Array.isArray(test.output) && test.output.length === 1) {
-            test.output = test.output.join();
-          }
-          test.result = eval(test.result);
-          // console.log(t, test);
-          if (typeof test !== 'object') {
-            errou = true;
-            return test;
-          } else {
-            if (
-              (test.output.toString() == t.output &&
-                test.result === t.result) ||
-              (test.result &&
-                t.result &&
-                arraysEqual(test.result, t.result) &&
-                test.output.toString() == t.output)
-            ) {
-              if (!errou) {
-                certos = 1;
-              }
-              console.log(certos);
-              return 'certo ex: ' + i;
-            } else if (
-              t.result &&
-              t.result.test &&
-              test.output.toString() === t.output &&
-              t.result.test(test.result)
-            ) {
-              if (!errou) {
-                certos = 1;
-              }
-              console.log(certos);
-              return 'certo ex: ' + i;
-            } else {
-              // console.log(Array.isArray(t.result), Array.isArray(test.result));
-              errou = true;
-              console.log('errou ex: ' + i);
-              return (
+module.exports = {
+  runTest: async function(fase) {
+    const run = Promise.all(
+      fase.map(async function(e, i) {
+        const a = Promise.all(
+          e.tests.map(async t => {
+            if (!t.output) t.output = '';
+            if (!t.result) t.result = null;
+            let test = await check(e.file, t.param);
+            if (Array.isArray(test.output) && test.output.length === 1) {
+              test.output = test.output.join();
+            }
+            test.result = eval(test.result);
+            const answer = {
+              level: i,
+              test:
                 'testando parametro(s) ' +
                 t.param +
                 '\nO resultado esperado era ' +
@@ -765,21 +731,46 @@ async function runTest(ex) {
                 '\nO console.log esperado era ' +
                 t.output +
                 ' e o obtido foi ' +
-                test.output
-              );
+                test.output,
+            };
+            if (typeof test !== 'object') {
+              answer.correct = false;
+              answer.test = test;
+              return answer;
+            } else {
+              if (
+                (test.output.toString() == t.output &&
+                  test.result === t.result) ||
+                (test.result &&
+                  t.result &&
+                  arraysEqual(test.result, t.result) &&
+                  test.output.toString() == t.output)
+              ) {
+                answer.correct = true;
+                return answer;
+              } else if (
+                t.result &&
+                t.result.test &&
+                test.output.toString() === t.output &&
+                t.result.test(test.result)
+              ) {
+                answer.correct = true;
+                return answer;
+              } else {
+                // console.log(Array.isArray(t.result), Array.isArray(test.result));
+                answer.correct = false;
+                return answer;
+              }
             }
-          }
-        })
-      );
-      const b = await a;
-      console.log('done', i, b);
-      return b;
-    })
-  );
-  const t = new Date().getTime();
-  console.log('fdfdsfsd', certos, t - r);
-  const c = await run;
-  console.log('sdasdasad', certos, new Date().getTime() - t);
-}
-
-runTest(process.argv[2]);
+          })
+        );
+        const b = await a;
+        return b;
+      })
+    );
+    const t = new Date().getTime();
+    const c = await run;
+    return c;
+  },
+};
+// runTest(process.argv[2]);
