@@ -41,7 +41,7 @@ module.exports = function(Correction) {
       Olá ${
         student.username
       }. Sua correção foi encerrada e o último passo para finalizar a fase é o formulário de feedback.<br>
-      <a href= 'https://docs.google.com/forms/d/e/1FAIpQLScVHdY9ApN8qkUzgvurvTjWDBDvRsWMmT3QQUIBVlUUUyLeQA/viewform?entry.805940912=${
+      <a href= 'https://docs.google.com/forms/d/e/1FAIpQLScLOVYYB-U-2K66sDJvxWQqLh34uiPxKnI-I01YwbHBu8-EEw/viewform?usp=pp_url&entry.805940912=${
         data.id
       }' target='_blank'>Clique aqui</a> para responder.`,
     };
