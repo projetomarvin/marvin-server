@@ -160,7 +160,7 @@ module.exports = function(Correction) {
       </p>`,
     };
     console.log(msg);
-    // sgMail.send(msg);
+    sgMail.send(msg);
   });
 
   Correction.remoteMethod('finishCorrection', {
