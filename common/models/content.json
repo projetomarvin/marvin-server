@@ -1,0 +1,30 @@
+{
+  "name": "content",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "createdAt": {
+      "type": "date"
+    },
+    "content": {
+      "type": "string",
+      "required": true
+    },
+    "tags": {
+      "type": [
+        "string"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

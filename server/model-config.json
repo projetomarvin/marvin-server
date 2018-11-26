@@ -58,5 +58,9 @@
   "correction": {
     "dataSource": "mongodb",
     "public": true
+  },
+  "content": {
+    "dataSource": "mongodb",
+    "public": true
   }
 }
