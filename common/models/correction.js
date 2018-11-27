@@ -150,6 +150,7 @@ module.exports = function(Correction) {
         'Com essa nota você não conseguiu avançar, corrija o ' +
         'que estiver errado e finalize a atividade novamente.';
       stuAct.finishedAt = undefined;
+      stuAct.correctorId = undefined;
       stuAct.save();
     }
     const msg = {
