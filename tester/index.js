@@ -29,14 +29,14 @@ module.exports = {
               test:
                 'testando parametro(s) ' +
                 t.param +
-                '\nO resultado esperado era ' +
+                '\nO resultado esperado era \"' +
                 t.result +
-                ' e o obtido foi ' +
+                '\" e o obtido foi \"' +
                 test.result +
-                '\nO console.log esperado era ' +
+                '\"\nO console.log esperado era \"' +
                 t.output +
-                ' e o obtido foi ' +
-                test.output,
+                '\" e o obtido foi \"' +
+                test.output + '\"',
             };
             if (typeof test !== 'object') {
               answer.correct = false;
