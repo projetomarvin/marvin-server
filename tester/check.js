@@ -3,7 +3,7 @@ const fs = require('fs');
 const {VM} = require('vm2');
 
 module.exports = async function(level, param, id) {
-  let folder;
+  let folder, log;
   let result = {};
   if (fs.existsSync('/home/ubuntu/activityFiles')) {
     folder = '/home/ubuntu/activityFiles/';
@@ -33,9 +33,15 @@ module.exports = async function(level, param, id) {
       userScript: file,
     },
   });
-  const log = vm.run(
-    'let output = [], console = {log: function(msg) { output.push(msg) }}; (function() { return {output, result: eval(userScript)} })();'
-  );
+  // FIXME: Colocar try catch aqui pra gerenciar erro
+  try {
+    log = vm.run(
+      'let output = [], console = {log: function(msg) { output.push(msg) }}; (function() { return {output, result: eval(userScript)} })();'
+    );
+  } catch (e) {
+    console.log(e);
+    return e.message;
+  }
   console.log(log);
   return log;
 };

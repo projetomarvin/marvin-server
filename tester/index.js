@@ -22,7 +22,7 @@ module.exports = {
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
             }
-	    console.log(t);
+	    console.log('RESULT', t, test);
             // test.result = eval(test.result);
             const answer = {
               level: i,
