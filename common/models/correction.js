@@ -130,8 +130,14 @@ module.exports = function(Correction) {
 
   Correction.afterRemote('finishCorrection', async function(ctx, data) {
     const Student = Correction.app.models.Student;
+    const StudentActivity = Correction.app.models.StudentActivity;
+    const corr = data.corr.toJSON();
+    console.log('JBLDIULDSGLIGSDALI', corr);
     const stu = await Student.findById(
-      data.corr.toJSON().studentActivity.studentId
+      corr.studentActivity.studentId
+    );
+    const stuAct = await StudentActivity.findById(
+      corr.studentActivity.id
     );
     const corrMsg = data.msg.replace(/\n/g, '<br>');
     let finalMsg;
@@ -143,6 +149,8 @@ module.exports = function(Correction) {
       finalMsg =
         'Com essa nota você não conseguiu avançar, corrija o ' +
         'que estiver errado e finalize a atividade novamente.';
+      stuAct.finishedAt = undefined;
+      stuAct.save();
     }
     const msg = {
       to: stu.email,
