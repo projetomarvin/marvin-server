@@ -132,27 +132,23 @@ module.exports = function(Correction) {
     const Student = Correction.app.models.Student;
     const StudentActivity = Correction.app.models.StudentActivity;
     const corr = data.corr.toJSON();
-    console.log('JBLDIULDSGLIGSDALI', corr);
-    const stu = await Student.findById(
-      corr.studentActivity.studentId
-    );
-    const stuAct = await StudentActivity.findById(
-      corr.studentActivity.id
-    );
+    const stu = await Student.findById(corr.studentActivity.studentId);
+    const stuAct = await StudentActivity.findById(corr.studentActivity.id);
     const corrMsg = data.msg.replace(/\n/g, '<br>');
     let finalMsg;
     if (data.grade >= 0.3) {
       finalMsg =
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         ' para ver os próximos desafios.';
+      stu.activityNumber += 1;
     } else {
       finalMsg =
         'Com essa nota você não conseguiu avançar, corrija o ' +
         'que estiver errado e finalize a atividade novamente.';
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
-      stuAct.save();
     }
+    stuAct.save();
     const msg = {
       to: stu.email,
       from: {
