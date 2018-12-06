@@ -101,15 +101,18 @@ module.exports = function(Correction) {
     let lastRight = 0;
     let errou = false;
     let correctionmsg = '';
-    correction.map(lvl => {
+    let correctorAcuracy = [];
+    correction.map((lvl, i) => {
       correctionmsg += `fase ${lvl[0].level}:\n`;
       lvl.map(t => {
         correctionmsg += `${t.test}:\n`;
         if (!t.correct) {
           errou = true;
           correctionmsg += 'ERRADO! \n\n';
+          correctorAcuracy[i] = 'Não';
         } else {
           correctionmsg += 'CERTO! \n\n';
+          if (correctorAcuracy[i] !== 'Não') correctorAcuracy[i] = 'Sim';
         }
       });
       if (!errou) {
@@ -125,6 +128,7 @@ module.exports = function(Correction) {
       grade: lastRight / levels,
       corr,
       Act,
+      correctorAcuracy,
     };
   };
 
@@ -133,14 +137,17 @@ module.exports = function(Correction) {
     const StudentActivity = Correction.app.models.StudentActivity;
     const corr = data.corr.toJSON();
     const stu = await Student.findById(corr.studentActivity.studentId);
-    const stuAct = await StudentActivity.findById(corr.studentActivity.id);
+    const stuCorr = await Student.findById(corr.correctorId);
+    const stuAct = await StudentActivity.findById(corr.studentActivityId);
     const corrMsg = data.msg.replace(/\n/g, '<br>');
     let finalMsg;
+    let precision = 0;
     if (data.grade >= 0.3) {
       finalMsg =
         'Parabéns, você passou de fase! Acesse a plataforma ' +
-        ' para ver os próximos desafios.';
+        'para ver os próximos desafios.';
       stu.activityNumber += 1;
+      stu.XPPpoints += 100 * data.grade;
     } else {
       finalMsg =
         'Com essa nota você não conseguiu avançar, corrija o ' +
@@ -148,7 +155,15 @@ module.exports = function(Correction) {
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
     }
+    for (let i = 0; i < data.correctorAcuracy.length; i++) {
+      if (data.correctorAcuracy[i] === corr['ex0' + i].works) {
+        precision += 1 / data.correctorAcuracy.length;
+      }
+    }
+    stuCorr.XPPoints += 20 * precision;
+    stuCorr.save();
     stuAct.save();
+    stu.save();
     const msg = {
       to: stu.email,
       from: {
