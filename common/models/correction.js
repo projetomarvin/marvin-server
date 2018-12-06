@@ -147,7 +147,7 @@ module.exports = function(Correction) {
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
       stu.activityNumber += 1;
-      stu.XPPpoints += 100 * data.grade;
+      stu.XPPoints += 100 * data.grade;
     } else {
       finalMsg =
         'Com essa nota você não conseguiu avançar, corrija o ' +
