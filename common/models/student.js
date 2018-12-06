@@ -50,6 +50,7 @@ module.exports = function(Student) {
       const activities = course.toJSON().activities;
       // console.log(usr, activities);
       usr.activityNumber = 1;
+      usr.XPPoints = 50;
       usr.username = data.owner.login;
       usr.save();
       StudentActivity.create({
