@@ -18,7 +18,7 @@ const s3 = new AWS.S3();
 module.exports = function(Studentactivity) {
   Studentactivity.beforeRemote('create', function(ctx, data, next) {
     const body = ctx.req.body;
-    body.createdAt = moment();
+    body.createdAt = moment().toDate();
     next();
   });
 
