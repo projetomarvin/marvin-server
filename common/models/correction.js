@@ -148,6 +148,11 @@ module.exports = function(Correction) {
         'para ver os próximos desafios.';
       stu.activityNumber += 1;
       stu.XPPoints += 100 * data.grade;
+      StudentActivity.create({
+        studentId: stu.id,
+        activityId: corr.studentActivity.activityId,
+        createdAt: moment().toDate(),
+      });
     } else {
       finalMsg =
         'Com essa nota você não conseguiu avançar, corrija o ' +
