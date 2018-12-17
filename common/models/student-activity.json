@@ -10,7 +10,7 @@
       "type": "date"
     },
     "finishedAt": {
-      "type": "date"
+      "type": "any"
     },
     "correctionGrade": {
       "type": "number"
