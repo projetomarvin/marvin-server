@@ -66,5 +66,9 @@
   "notification": {
     "dataSource": "mongodb",
     "public": false
+  },
+  "feedback": {
+    "dataSource": "mongodb",
+    "public": false
   }
 }

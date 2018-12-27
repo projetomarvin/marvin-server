@@ -1,0 +1,19 @@
+{
+  "name": "feedback",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "correction": {
+      "type": "belongsTo",
+      "model": "correction",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
