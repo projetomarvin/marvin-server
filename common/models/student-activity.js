@@ -135,7 +135,7 @@ module.exports = function(Studentactivity) {
       }
     );
     stActiity.correctorId = userId;
-    stActiity.finishedAt = moment();
+    stActiity.finishedAt = moment().toDate();
     stActiity.save();
     const corr = await correction.create({
       studentActivityId: id,

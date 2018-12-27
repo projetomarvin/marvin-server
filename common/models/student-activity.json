@@ -6,7 +6,7 @@
     "validateUpsert": true
   },
   "properties": {
-    "startedAt": {
+    "createdAt": {
       "type": "date"
     },
     "finishedAt": {
