@@ -118,6 +118,7 @@ module.exports = function(Correction) {
     return {
       msg: correctionmsg,
       grade: lastRight / levels,
+      cheat: a.cheat,
       corr,
       Act,
       correctorAcuracy,
@@ -129,13 +130,28 @@ module.exports = function(Correction) {
     const Notification = Correction.app.models.Notification;
     const StudentActivity = Correction.app.models.StudentActivity;
     const corr = data.corr.toJSON();
-    const stu = await Student.findById(corr.studentActivity.studentId);
+    const stu = await Student.findById(corr.studentActivity.studentId, {
+      include: {course: 'activities'},
+    });
     const stuCorr = await Student.findById(corr.correctorId);
     const stuAct = await StudentActivity.findById(corr.studentActivityId);
+    const prevMsg = await Notification.findOne({
+      where: {targetURL: `/feedback.html?${corr.id}`},
+    });
     const corrMsg = data.msg.replace(/\n/g, '<br>');
+    const course = stu.toJSON();
+    console.log('STU', course.course.activities);
     let finalMsg;
     let precision = 0;
-    if (data.grade >= 0.3) {
+    if (data.cheat) {
+      finalMsg =
+        'A pessoa que te corrigiu indicou que você burlou as regras' +
+        'da correção, seja copiando código ou usando trechos que ' +
+        'não conseguiu explicar, portanto sua nota é zero e você ' +
+        'terá que refazer a fase';
+      stuAct.finishedAt = undefined;
+      stuAct.correctorId = undefined;
+    } else if (data.grade >= 0.3) {
       finalMsg =
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
