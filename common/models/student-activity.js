@@ -153,27 +153,14 @@ module.exports = function(Studentactivity) {
   };
 
   Studentactivity.afterRemote('finish', async function(ctx, data) {
-    const msg = {
-      to: data.corrector.email,
-      from: {
-        email: 'contato@projetomarvin.com',
-        name: 'Marvin',
-      },
-      subject: 'Nova correção',
-      html: `<p>
-      Olá ${data.corrector.username}.
-      <br>
-      <br>
-      Você foi convidado(a) por <b>${data.student.username}</b> para correção.
-      <br>
-      O link do formulário de correção é <a href="https://docs.google.com/forms/d/e/1FAIpQLSedo-dSfvz8IBYstjStDFcC70YVP13LbHRNkF60KkBM22r4zg/viewform?usp=pp_url&entry.790675438=${
-        data.correction.id
-      }" target="_blank">esse aqui</a>
-       e os arquivos estão disponíveis <a href="https://s3-sa-east-1.amazonaws.com/marvin-files/${
-         data.activity.id
-       }.zip" target="_blank">aqui</a>`,
-    };
-    sgMail.send(msg);
+    const Notification = Studentactivity.app.models.Notification;
+    Notification.create({
+      studentId: data.corrector.id,
+      createdAt: moment().toDate(),
+      message: `${data.student.username} te convidou para correção.
+        Clique para começar`,
+      targetURL: `/correcao.html?${data.correction.id}`,
+    });
   });
 
   Studentactivity.remoteMethod('finish', {
