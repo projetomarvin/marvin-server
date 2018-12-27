@@ -41,6 +41,11 @@
       "type": "belongsTo",
       "model": "correction",
       "foreignKey": ""
+    },
+    "notifications": {
+      "type": "hasMany",
+      "model": "notification",
+      "foreignKey": ""
     }
   },
   "acls": [
@@ -50,6 +55,27 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "checkRepository"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__create__notifications"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__updateById__notifications"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__notifications"
     },
     {
       "accessType": "EXECUTE",

@@ -1,0 +1,35 @@
+{
+  "name": "notification",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "createdAt": {
+      "type": "date"
+    },
+    "read": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "message": {
+      "type": "string",
+      "required": true
+    },
+    "targetURL": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "student": {
+      "type": "belongsTo",
+      "model": "student",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

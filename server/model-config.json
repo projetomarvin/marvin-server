@@ -62,5 +62,9 @@
   "content": {
     "dataSource": "mongodb",
     "public": true
+  },
+  "notification": {
+    "dataSource": "mongodb",
+    "public": false
   }
 }
