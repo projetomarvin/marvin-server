@@ -26,26 +26,18 @@ module.exports = function(Correction) {
     data
   ) {
     const StudentActivity = Correction.app.models.StudentActivity;
-    const stuAct = await StudentActivity.findById(data.studentActivityId, {
-      include: 'student',
+    const Notification = Correction.app.models.Notification;
+    const stuAct = await StudentActivity.findById(data.studentActivityId);
+    const prevMsg = await Notification.findOne({
+      where: {targetURL: `/correcao.html?${data.id}`},
     });
-    const student = stuAct.toJSON().student;
-    const msg = {
-      to: student.email,
-      from: {
-        email: 'contato@projetomarvin.com',
-        name: 'Marvin',
-      },
-      subject: 'Feedback de correção',
-      html: `<p>
-      Olá ${
-        student.username
-      }. Sua correção foi encerrada e o último passo para finalizar a fase é o formulário de feedback.<br>
-      <a href= 'https://docs.google.com/forms/d/e/1FAIpQLScLOVYYB-U-2K66sDJvxWQqLh34uiPxKnI-I01YwbHBu8-EEw/viewform?usp=pp_url&entry.805940912=${
-        data.id
-      }' target='_blank'>Clique aqui</a> para responder.`,
-    };
-    sgMail.send(msg);
+    prevMsg.destroy();
+    Notification.create({
+      studentId: stuAct.studentId,
+      createdAt: moment().toDate(),
+      message: 'Sua correção terminou, clique para dar o feedback.',
+      targetURL: `/feedback.html?${data.id}`,
+    });
   });
 
   Correction.finishCorrection = async function(id) {
@@ -134,6 +126,7 @@ module.exports = function(Correction) {
 
   Correction.afterRemote('finishCorrection', async function(ctx, data) {
     const Student = Correction.app.models.Student;
+    const Notification = Correction.app.models.Notification;
     const StudentActivity = Correction.app.models.StudentActivity;
     const corr = data.corr.toJSON();
     const stu = await Student.findById(corr.studentActivity.studentId);
@@ -184,8 +177,18 @@ module.exports = function(Correction) {
       ${finalMsg}
       </p>`,
     };
-    console.log(msg);
+    Notification.create({
+      studentId: corr.studentActivity.studentId,
+      createdAt: moment().toDate(),
+      message: `Sua correção terminou e a
+       nota final foi ${Math.floor(data.grade * 100)}%.
+       Veja seu e-mail para mais detalhes`,
+      targetURL: '#',
+    });
     sgMail.send(msg);
+    if (prevMsg) {
+      prevMsg.destroy();
+    }
   });
 
   Correction.remoteMethod('finishCorrection', {
