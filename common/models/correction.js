@@ -143,7 +143,7 @@ module.exports = function(Correction) {
       stu.XPPoints += 100 * data.grade;
       StudentActivity.create({
         studentId: stu.id,
-        activityId: corr.studentActivity.activityId,
+        activityId: course.course.activities[stu.activityNumber].id,
         createdAt: moment().toDate(),
       });
     } else {
