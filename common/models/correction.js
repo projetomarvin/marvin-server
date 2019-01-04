@@ -11,6 +11,9 @@ const sgKey =
 sgMail.setApiKey(sgKey);
 
 module.exports = function(Correction) {
+  Correction.disableRemoteMethodByName('prototype.__get__feedbacks');
+  Correction.disableRemoteMethodByName('prototype.__destroy__feedbacks');
+  Correction.disableRemoteMethodByName('prototype.__update__feedbacks');
   Correction.beforeRemote('prototype.patchAttributes', function(
     ctx,
     data,

@@ -7,6 +7,13 @@ const sgKey =
   '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';
 
 module.exports = function(Student) {
+  Student.disableRemoteMethodByName('prototype.__get__notifications');
+  Student.disableRemoteMethodByName('prototype.__create__notifications');
+  Student.disableRemoteMethodByName('prototype.__delete__notifications');
+  Student.disableRemoteMethodByName('prototype.__destroyById__notifications');
+  Student.disableRemoteMethodByName('prototype.__updateById__notifications');
+  Student.disableRemoteMethodByName('prototype.__findById__notifications');
+  Student.disableRemoteMethodByName('prototype.__count__notifications');
   Student.beforeRemote('login', function(ctx, data, next) {
     const body = ctx.req.body;
     if (body.user.includes('@')) {
