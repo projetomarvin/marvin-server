@@ -143,7 +143,6 @@ module.exports = function(Correction) {
     });
     const corrMsg = data.msg.replace(/\n/g, '<br>');
     const course = stu.toJSON();
-    console.log('STU', course.course.activities);
     let finalMsg;
     let precision = 0;
     if (data.cheat) {
@@ -180,6 +179,7 @@ module.exports = function(Correction) {
     stuCorr.XPPoints += 20 * precision;
     stuCorr.save();
     stuAct.save();
+    delete stu.course;
     stu.save();
     const msg = {
       to: stu.email,
