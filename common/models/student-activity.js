@@ -25,9 +25,9 @@ module.exports = function(Studentactivity) {
   Studentactivity.checkFiles = async function(id) {
     const Activity = Studentactivity.app.models.Activity;
     const students = Studentactivity.app.models.Student;
-    const stActiity = await Studentactivity.findById(id);
-    const stu = await students.findById(stActiity.studentId);
-    const Act = await Activity.findById(stActiity.activityId);
+    const stActivity = await Studentactivity.findById(id);
+    const stu = await students.findById(stActivity.studentId);
+    const Act = await Activity.findById(stActivity.activityId);
     try {
       const data = await Promise.all(
         Act.exercises.map(async r => {
