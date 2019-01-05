@@ -38,7 +38,17 @@ module.exports = {
                 '\" e o obtido foi \"' +
                 test.output + '\"',
             };
-            if (typeof test !== 'object') {
+            if (t.function) {
+              console.log('!!!!TO RODANDO A FUNCAO', t.function, eval(t.function));
+              answer.test = 'testando na função: ' + t.function;
+              if (eval(t.function)) {
+                answer.correct = true;
+                return answer;
+              } else {
+                answer.correct = false;
+                return answer;
+              }
+            } else if (typeof test !== 'object') {
               answer.correct = false;
               answer.test = test;
               return answer;
@@ -73,7 +83,6 @@ module.exports = {
         return b;
       })
     );
-    const t = new Date().getTime();
     const c = await run;
     return c;
   },
