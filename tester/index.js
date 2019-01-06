@@ -17,7 +17,6 @@ module.exports = {
         const a = Promise.all(
           e.tests.map(async t => {
             if (!t.output) t.output = '';
-            if (!t.result) t.result = undefined;
             let test = await check(e.file, t.param, id);
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
@@ -38,7 +37,13 @@ module.exports = {
                 '\" e o obtido foi \"' +
                 test.output + '\"',
             };
-            if (t.function) {
+            if (typeof test !== 'object') {
+              answer.correct = false;
+              answer.test = test;
+              return answer;
+            } else if (t.function) {
+              let test2 = await check(e.file, t.param, id);
+              let test3 = await check(e.file, t.param, id);
               console.log('!!!!TO RODANDO A FUNCAO', t.function, eval(t.function));
               answer.test = 'testando na função: ' + t.function;
               if (eval(t.function)) {
@@ -48,10 +53,6 @@ module.exports = {
                 answer.correct = false;
                 return answer;
               }
-            } else if (typeof test !== 'object') {
-              answer.correct = false;
-              answer.test = test;
-              return answer;
             } else {
               if (
                 (test.output.toString() == t.output &&
