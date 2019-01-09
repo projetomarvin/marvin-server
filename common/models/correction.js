@@ -147,10 +147,10 @@ module.exports = function(Correction) {
     let precision = 0;
     if (data.cheat) {
       finalMsg =
-        'A pessoa que te corrigiu indicou que você burlou as regras' +
+        '<b>A pessoa que te corrigiu indicou que você burlou as regras' +
         'da correção, seja copiando código ou usando trechos que ' +
         'não conseguiu explicar, portanto sua nota é zero e você ' +
-        'terá que refazer a fase';
+        'terá que refazer a fase</b>';
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
     } else if (data.grade >= 0.3) {
