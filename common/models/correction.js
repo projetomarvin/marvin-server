@@ -153,7 +153,7 @@ module.exports = function(Correction) {
         'terá que refazer a fase</b>';
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
-    } else if (data.grade >= 0.3) {
+    } else if (data.grade >= 0.5) {
       finalMsg =
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
