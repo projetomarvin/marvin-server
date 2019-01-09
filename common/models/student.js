@@ -10,7 +10,6 @@ module.exports = function(Student) {
   Student.disableRemoteMethodByName('prototype.__get__notifications');
   Student.disableRemoteMethodByName('prototype.__create__notifications');
   Student.disableRemoteMethodByName('prototype.__delete__notifications');
-  Student.disableRemoteMethodByName('prototype.__destroyById__notifications');
   Student.disableRemoteMethodByName('prototype.__updateById__notifications');
   Student.disableRemoteMethodByName('prototype.__findById__notifications');
   Student.disableRemoteMethodByName('prototype.__count__notifications');
