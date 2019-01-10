@@ -63,6 +63,7 @@ module.exports = function(Student) {
         studentId: data.id,
         activityId: activities[1].id,
         createdAt: moment().toDate(),
+        fails: 0,
       });
       return;
     }

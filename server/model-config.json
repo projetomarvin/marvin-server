@@ -92,7 +92,9 @@
           "checkFiles": true,
           "finish": true,
           "findById": true,
-          "prototype.patchAttributes": true
+          "prototype.patchAttributes": true,
+          "cancelCorrection": true,
+          "redo": true
         }
       }
     }
@@ -106,7 +108,8 @@
           "*": false,
           "prototype.patchAttributes": true,
           "findById": true,
-          "finishCorrection": true
+          "finishCorrection": true,
+          "startCorrection": true
         }
       }
     }

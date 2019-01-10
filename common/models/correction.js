@@ -117,6 +117,7 @@ module.exports = function(Correction) {
     });
     corr.message = correctionmsg;
     corr.grade = lastRight / levels;
+    corr.started = false;
     corr.save();
     return {
       msg: correctionmsg,
@@ -153,16 +154,24 @@ module.exports = function(Correction) {
         'terá que refazer a fase</b>';
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
-    } else if (data.grade >= 0.5) {
+      stuAct.fails++;
+    } else if (
+      data.grade >= course.course.activities[stu.activityNumber].minGrade
+    ) {
       finalMsg =
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
       stu.activityNumber += 1;
-      stu.XPPoints += 100 * data.grade;
+      console.log(stuAct.fails);
+      if (stuAct.fails)
+        stu.XPPoints += data.grade * 100 / (stuAct.fails + 1);
+      else if (stuAct.fails === 0)
+        stu.XPPoints += 100 * data.grade;
       StudentActivity.create({
         studentId: stu.id,
         activityId: course.course.activities[stu.activityNumber].id,
         createdAt: moment().toDate(),
+        fails: 0,
       });
     } else {
       finalMsg =
@@ -170,6 +179,7 @@ module.exports = function(Correction) {
         'que estiver errado e finalize a atividade novamente.';
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
+      stuAct.fails++;
     }
     for (let i = 0; i < data.correctorAcuracy.length; i++) {
       if (data.correctorAcuracy[i] === corr['ex0' + i].works) {
@@ -222,6 +232,28 @@ module.exports = function(Correction) {
     },
     http: {
       path: '/:id/finish',
+      verb: 'post',
+    },
+  });
+
+  Correction.startCorrection = async function(id) {
+    const corr = await Correction.findById(id);
+    corr.started = true;
+    corr.save();
+  };
+
+  Correction.remoteMethod('startCorrection', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/start',
       verb: 'post',
     },
   });
