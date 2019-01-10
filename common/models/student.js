@@ -173,7 +173,6 @@ module.exports = function(Student) {
 
   Student.getUsername = async function (id) {
     const stu =  await Student.findById(id);
-    console.log(stu);
     if (stu) {
       return stu.username;
     } else {
