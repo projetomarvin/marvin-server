@@ -39,9 +39,7 @@ module.exports = async function(level, param, id) {
       'let output = [], console = {log: function(msg) { output.push(msg) }}; (function() { return {output, result: eval(userScript)} })();'
     );
   } catch (e) {
-    console.log(e);
     return e.message;
   }
-  console.log(log);
   return log;
 };

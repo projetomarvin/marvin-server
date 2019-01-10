@@ -17,6 +17,9 @@ module.exports = {
         const a = Promise.all(
           e.tests.map(async t => {
             if (!t.output) t.output = '';
+            if (typeof t.param === 'object' && t.param.toDate) {
+              t.param = new Date(t.param.toDate);
+            }
             let test = await check(e.file, t.param, id);
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
