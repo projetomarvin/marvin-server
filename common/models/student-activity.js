@@ -185,4 +185,91 @@ module.exports = function(Studentactivity) {
       verb: 'put',
     },
   });
+
+  Studentactivity.cancelCorrection = async function(id) {
+    const Correction = Studentactivity.app.models.Correction;
+    const Notification = Studentactivity.app.models.Notification;
+    const curAct = await Studentactivity.findById(id, {include: 'corrections'});
+    let act = JSON.stringify(curAct);
+    act = JSON.parse(act);
+    const corr = act.corrections.sort((a, b) =>
+      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1
+    );
+    const lastCorr = corr[corr.length - 1];
+    const not = await Notification.findOne({
+      where: {targetURL: `/correcao.html?${lastCorr.id}`},
+    });
+    console.log(not, lastCorr);
+    if (lastCorr.started) {
+      const err = new Error();
+      err.statusCode = 403;
+      err.message = 'correction already started';
+      throw err;
+    }
+    Correction.destroyById(lastCorr.id, e => console.log(e));
+    Notification.destroyById(not.id, e => console.log(e));
+    curAct.correctorId = undefined;
+    curAct.finishedAt = undefined;
+    curAct.save();
+  };
+
+  Studentactivity.remoteMethod('cancelCorrection', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/cancelCorrection',
+      verb: 'put',
+    },
+  });
+
+  Studentactivity.redo = async function(id) {
+    const Student = Studentactivity.app.models.Student;
+    const Act = await Studentactivity.findById(id);
+    let act = JSON.stringify(Act);
+    act = JSON.parse(act);
+    const st = await Student.findById(act.studentId, {
+      include: 'studentActivities',
+    });
+    let stu = JSON.stringify(st);
+    stu = JSON.parse(stu);
+    const latestAct = stu.studentActivities.sort((a, b) =>
+      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1
+    )[stu.studentActivities.length - 1];
+    console.log(stu, latestAct);
+    Act.fails = NaN;
+    Act.correctorId = undefined;
+    Act.finishedAt = undefined;
+    st.activityNumber--;
+    Studentactivity.destroyById(latestAct.id);
+    st.save();
+    Act.save();
+  };
+
+  Studentactivity.afterRemote('redo', (context, remoteMethodOutput, next) => {
+    let res = context.res;
+    res.redirect('https://app.projetomarvin.com/atividades.html');
+  });
+
+  Studentactivity.remoteMethod('redo', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/redo',
+      verb: 'get',
+    },
+  });
 };
