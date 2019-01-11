@@ -165,7 +165,7 @@ module.exports = function(Correction) {
       console.log(stuAct.fails);
       if (stuAct.fails)
         stu.XPPoints += data.grade * 100 / (stuAct.fails + 1);
-      else if (stuAct.fails === 0)
+      else if (stuAct.fails === 0 || !stuAct.fails)
         stu.XPPoints += 100 * data.grade;
       StudentActivity.create({
         studentId: stu.id,
