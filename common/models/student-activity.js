@@ -63,11 +63,13 @@ module.exports = function(Studentactivity) {
 
   Studentactivity.beforeRemote('finish', async function(ctx, data) {
     const id = ctx.req.params.id;
-    const stActiity = await Studentactivity.findById(id);
-    if (stActiity.finishedAt) {
-      const err = new Error();
-      err.message = 'atividade já finalizada';
-      throw err;
+    const stActivity = await Studentactivity.findById(id, {include: 'student'});
+    const student = stActivity.toJSON().student;
+    console.log(student);
+    if (stActivity.finishedAt) {
+      throw Error('atividade já finalizada');
+    } else if (student.correctionPoints <= 0) {
+      throw Error('pontos de correção insuficientes');
     }
     return;
   });
