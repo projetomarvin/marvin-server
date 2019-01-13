@@ -53,6 +53,9 @@ module.exports = function(Student) {
       const course = await Course.findById(usr.courseId, {
         include: 'activities',
       });
+      if (usr.githubAccessToken) {
+        return;
+      }
       const activities = course.toJSON().activities;
       // console.log(usr, activities);
       usr.activityNumber = 1;
