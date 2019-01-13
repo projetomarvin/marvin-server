@@ -130,6 +130,8 @@ module.exports = function(Studentactivity) {
     );
     stActiity.correctorId = userId;
     stActiity.finishedAt = moment().toDate();
+    stu.correctionPoints--;
+    stu.save();
     stActiity.save();
     const corr = await correction.create({
       studentActivityId: id,
@@ -240,9 +242,8 @@ module.exports = function(Studentactivity) {
     Act.fails = NaN;
     Act.correctorId = undefined;
     Act.finishedAt = undefined;
-    st.activityNumber--;
     Studentactivity.destroyById(latestAct.id);
-    st.save();
+    st.updateAttributes({activityNumber: st.activityNumber - 1});
     Act.save();
   };
 
