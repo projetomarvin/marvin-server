@@ -146,6 +146,7 @@ module.exports = function(Correction) {
     const course = stu.toJSON();
     let finalMsg;
     let precision = 0;
+    let stuChanges = {};
     if (data.cheat) {
       finalMsg =
         '<b>A pessoa que te corrigiu indicou que você burlou as regras' +
@@ -164,9 +165,9 @@ module.exports = function(Correction) {
       stu.activityNumber += 1;
       console.log(stuAct.fails);
       if (stuAct.fails)
-        stu.XPPoints += data.grade * 100 / (stuAct.fails + 1);
+        stuChanges.XPPoints += data.grade * 100 / (stuAct.fails + 1);
       else if (stuAct.fails === 0 || !stuAct.fails)
-        stu.XPPoints += 100 * data.grade;
+        stuChanges.XPPoints += 100 * data.grade;
       StudentActivity.create({
         studentId: stu.id,
         activityId: course.course.activities[stu.activityNumber].id,
@@ -187,10 +188,11 @@ module.exports = function(Correction) {
       }
     }
     stuCorr.XPPoints += 20 * precision;
+    stuCorr.correctionPoints++;
     stuCorr.save();
     stuAct.save();
-    delete stu.course;
-    stu.save();
+    console.log();
+    stu.updateAttribute(stuChanges);
     const msg = {
       to: stu.email,
       from: {
