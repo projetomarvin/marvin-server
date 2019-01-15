@@ -71,8 +71,8 @@
         "sharedMethods": {
           "*": false,
           "login": true,
-          "reset": true,
-          "reset-password": true,
+          "setPassword": true,
+          "resetPassword": true,
           "findById": true,
           "getUsername": true,
           "pushToGit": true,
