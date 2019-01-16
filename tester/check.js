@@ -20,7 +20,7 @@ module.exports = async function(level, param, id) {
     let arrayParams = '';
     params.map(p => {
       if (typeof p === 'string') arrayParams += "'" + p + "',";
-      else if (!Array.isArray(p)) arrayParams += p.toString() + ',';
+      else if (!Array.isArray(p)) arrayParams += JSON.stringify(p) + ',';
       else arrayParams += JSON.stringify(p) + ',';
     });
     params = arrayParams;

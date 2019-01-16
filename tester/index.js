@@ -2,12 +2,7 @@
 const check = require('./check.js');
 
 function arraysEqual(arr1, arr2) {
-  if (arr1.length !== arr2.length) return false;
-  for (var i = arr1.length; i--;) {
-    if (arr1[i] !== arr2[i]) return false;
-  }
-
-  return true;
+  return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
 
 module.exports = {
@@ -17,9 +12,6 @@ module.exports = {
         const a = Promise.all(
           e.tests.map(async t => {
             if (!t.output) t.output = '';
-            if (typeof t.param === 'object' && t.param.toDate) {
-              t.param = new Date(t.param.toDate);
-            }
             let test = await check(e.file, t.param, id);
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
@@ -30,15 +22,15 @@ module.exports = {
               level: i,
               test:
                 'testando parametro(s) ' +
-                t.param +
-                '\nO resultado esperado era \"' +
-                t.result +
-                '\" e o obtido foi \"' +
-                test.result +
-                '\"\nO console.log esperado era \"' +
-                t.output +
-                '\" e o obtido foi \"' +
-                test.output + '\"',
+                JSON.stringify(t.param) +
+                '\nO resultado esperado era ' +
+                JSON.stringify(t.result) +
+                ' e o obtido foi ' +
+                JSON.stringify(test.result) +
+                '\nO console.log esperado era ' +
+                JSON.stringify(t.output) +
+                ' e o obtido foi ' +
+                JSON.stringify(test.output),
             };
             if (typeof test !== 'object') {
               answer.correct = false;
@@ -47,7 +39,7 @@ module.exports = {
             } else if (t.function) {
               let test2 = await check(e.file, t.param, id);
               let test3 = await check(e.file, t.param, id);
-              console.log('!!!!TO RODANDO A FUNCAO', t.function, eval(t.function));
+              console.log('!TO RODANDO A FUNCAO', t.function, eval(t.function));
               answer.test = 'testando na função: ' + t.function;
               if (eval(t.function)) {
                 answer.correct = true;
