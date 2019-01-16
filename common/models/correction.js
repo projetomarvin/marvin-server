@@ -14,6 +14,7 @@ module.exports = function(Correction) {
   Correction.disableRemoteMethodByName('prototype.__get__feedbacks');
   Correction.disableRemoteMethodByName('prototype.__destroy__feedbacks');
   Correction.disableRemoteMethodByName('prototype.__update__feedbacks');
+
   Correction.beforeRemote('prototype.patchAttributes', function(
     ctx,
     data,
@@ -169,7 +170,7 @@ module.exports = function(Correction) {
       else stuChanges.XPPoints = stu.XPPoints + 100 * data.grade;
       StudentActivity.create({
         studentId: stu.id,
-        activityId: course.course.activities[stu.activityNumber].id,
+        activityId: course.course.activities[stuChanges.activityNumber].id,
         createdAt: moment().toDate(),
         fails: 0,
       });
