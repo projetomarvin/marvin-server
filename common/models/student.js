@@ -53,7 +53,7 @@ module.exports = function(Student) {
       const course = await Course.findById(usr.courseId, {
         include: 'activities',
       });
-      if (usr.githubAccessToken) {
+      if (usr.activityNumber > 0) {
         return;
       }
       const activities = course.toJSON().activities;
