@@ -99,7 +99,7 @@ module.exports = function(Correction) {
     let correctionmsg = '';
     let correctorAcuracy = [];
     correction.map((lvl, i) => {
-      correctionmsg += `fase ${lvl[0].level}:\n`;
+      correctionmsg += `Exercício ${lvl[0].level}:\n`;
       lvl.map(t => {
         correctionmsg += `${t.test}:\n`;
         if (!t.correct) {
