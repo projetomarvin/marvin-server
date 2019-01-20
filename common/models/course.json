@@ -75,6 +75,13 @@
       "principalId": "facilitator",
       "permission": "ALLOW",
       "property": "__create__activities"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "facilitator",
+      "permission": "ALLOW",
+      "property": "find"
     }
   ],
   "methods": {}
