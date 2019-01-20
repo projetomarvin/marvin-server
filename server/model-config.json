@@ -43,7 +43,8 @@
       "remoting": {
         "sharedMethods": {
           "*": false,
-          "findById": true
+          "findById": true,
+          "upload": true
         }
       }
     }
@@ -55,6 +56,7 @@
       "remoting": {
         "sharedMethods": {
           "*": false,
+          "find": true,
           "findById": true,
           "create": true,
           "prototype.__create__students": true,
