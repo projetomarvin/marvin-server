@@ -65,7 +65,6 @@ module.exports = function(Studentactivity) {
     const id = ctx.req.params.id;
     const stActivity = await Studentactivity.findById(id, {include: 'student'});
     const student = stActivity.toJSON().student;
-    console.log(student);
     if (stActivity.finishedAt) {
       throw Error('atividade já finalizada');
     } else if (student.correctionPoints <= 0) {
@@ -75,14 +74,13 @@ module.exports = function(Studentactivity) {
   });
 
   Studentactivity.finish = async function(userId, id) {
-    console.log(userId);
     const Activity = Studentactivity.app.models.Activity;
     const students = Studentactivity.app.models.Student;
     const courses = Studentactivity.app.models.Course;
     const correction = Studentactivity.app.models.Correction;
-    const stActiity = await Studentactivity.findById(id);
-    const stu = await students.findById(stActiity.studentId);
-    const Act = await Activity.findById(stActiity.activityId);
+    const stActivity = await Studentactivity.findById(id);
+    const stu = await students.findById(stActivity.studentId);
+    const Act = await Activity.findById(stActivity.activityId);
     const corrector = await students.findById(userId);
     let folder;
     let path = Act.exercises[0].file.split('/');
@@ -92,49 +90,72 @@ module.exports = function(Studentactivity) {
     } else {
       folder = '/home/dante/Documents';
     }
+    await execSync(`rm -rf ${folder}/${id}`);
     await fs.mkdirSync(`${folder}/${id}`);
     await fs.mkdirSync(`${folder}/${id}/${path}`);
-    const files = await Promise.all(
+    await Promise.all(
       Act.exercises.map(async r => {
         let path2 = r.file.split('/');
         path2.splice(-1, 1);
         path2 = path2.join('/');
-        const exe = await execSync(`mkdir ${folder}/${id}/${path2}`);
-        const file = await axios(
-          `https://api.github.com/repos/${stu.username}/marvin/contents/` +
-            r.file +
+        await execSync(`mkdir ${folder}/${id}/${path2}`);
+        const commits = await axios(
+          `https://api.github.com/repos/${stu.username}/marvin/commits` +
             '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
         );
-        fs.writeFileSync(
-          `${folder}/${id}/${r.file}`,
-          file.data.content,
-          'base64',
-          function(err) {
-            console.log('File created', err);
-          }
+        const files = await axios(
+          'https://api.github.com/repos/' +
+            stu.username +
+            '/marvin/git/trees/' +
+            commits.data[0].sha +
+            '?recursive=1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+        );
+        const currentFiles = files.data.tree.filter(obj => {
+          return obj.mode === '100644' && obj.path.includes(path2);
+        });
+        await Promise.all(
+          currentFiles.map(async f => {
+            const file = await axios(
+              `https://api.github.com/repos/${stu.username}/marvin/contents` +
+                f.path +
+                '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+            );
+            await fs.writeFileSync(
+              `${folder}/${id}/${f.path}`,
+              file.data.content,
+              'base64'
+            );
+            console.log('file created');
+          })
         );
       })
     );
     await execSync(`zip -r ${folder}/${id}.zip ${folder}/${id}`);
     await execSync(`rm -rf ${folder}/${id}`);
     const file = await fs.readFileSync(`${folder}/${id}.zip`);
-    s3.upload(
-      {
-        Bucket: 'marvin-files',
-        ACL: 'public-read',
-        Key: `${id}.zip`,
-        Body: file,
-      },
-      (err, result) => {
-        fs.unlinkSync(`${folder}/${id}.zip`);
-        console.log(err, result);
-      }
-    );
-    stActiity.correctorId = userId;
-    stActiity.finishedAt = moment().toDate();
+    const up = new Promise(resolve => {
+      s3.upload(
+        {
+          Bucket: 'marvin-files',
+          ACL: 'public-read',
+          Key: `${id}.zip`,
+          Body: file,
+        },
+        (err, result) => {
+          fs.unlinkSync(`${folder}/${id}.zip`);
+          console.log(err, result);
+          resolve();
+        }
+      );
+    });
+    await up;
+    if (!Act.exercises[0].tests)
+      stActivity.corrector2Id = 0;
+    stActivity.correctorId = userId;
+    stActivity.finishedAt = moment().toDate();
     stu.correctionPoints--;
     stu.save();
-    stActiity.save();
+    stActivity.save();
     const corr = await correction.create({
       studentActivityId: id,
       correctorId: userId,
@@ -146,7 +167,7 @@ module.exports = function(Studentactivity) {
       corrector: corrector,
       correction: corr,
       student: stu,
-      activity: stActiity,
+      activity: stActivity,
     };
   };
 
