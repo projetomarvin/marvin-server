@@ -44,7 +44,7 @@ module.exports = function(Correction) {
     });
   });
 
-  Correction.finishCorrection = async function(id) {
+  Correction.finishCorrectionAuto = async function(id) {
     const Activity = Correction.app.models.Activity;
     const corr = await Correction.findById(id, {
       include: 'studentActivity',
@@ -130,7 +130,7 @@ module.exports = function(Correction) {
     };
   };
 
-  Correction.afterRemote('finishCorrection', async function(ctx, data) {
+  Correction.afterRemote('finishCorrectionAuto', async function(ctx, data) {
     const Student = Correction.app.models.Student;
     const Notification = Correction.app.models.Notification;
     const StudentActivity = Correction.app.models.StudentActivity;
@@ -221,7 +221,7 @@ module.exports = function(Correction) {
     }
   });
 
-  Correction.remoteMethod('finishCorrection', {
+  Correction.remoteMethod('finishCorrectionAuto', {
     accepts: {
       arg: 'id',
       type: 'string',
