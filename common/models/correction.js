@@ -44,7 +44,31 @@ module.exports = function(Correction) {
     });
   });
 
-  Correction.finishCorrectionAuto = async function(id) {
+  Correction.afterRemote('prototype.__create__feedbacks', async function(
+    ctx,
+    data
+  ) {
+    const StudentActivity = Correction.app.models.StudentActivity;
+    const Activity = Correction.app.models.Activity;
+    const Notification = Correction.app.models.Notification;
+    const Student = Correction.app.models.Student;
+    const corr = await Correction.findById(data.correctionId);
+    const stAct = await StudentActivity.findById(corr.studentActivityId);
+    const Act = await Activity.findById(stAct.activityId);
+    const stCorr = await Student.findById(corr.correctorId);
+    const prevMsg = await Notification.findOne({
+      where: {targetURL: `/feedback.html?${corr.id}`},
+    });
+    if (!Act.exercises[0].tests && !stAct.corrector2Id && stAct.correctorId) {
+      stAct.updateAttributes({corrector2Id: 0});
+      stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1});
+    }
+    if (prevMsg) {
+      prevMsg.destroy();
+    }
+  });
+
+  Correction.finishCorrection = async function(id) {
     const Activity = Correction.app.models.Activity;
     const corr = await Correction.findById(id, {
       include: 'studentActivity',
@@ -130,7 +154,7 @@ module.exports = function(Correction) {
     };
   };
 
-  Correction.afterRemote('finishCorrectionAuto', async function(ctx, data) {
+  Correction.afterRemote('finishCorrection', async function(ctx, data) {
     const Student = Correction.app.models.Student;
     const Notification = Correction.app.models.Notification;
     const StudentActivity = Correction.app.models.StudentActivity;
@@ -140,9 +164,6 @@ module.exports = function(Correction) {
     });
     const stuCorr = await Student.findById(corr.correctorId);
     const stuAct = await StudentActivity.findById(corr.studentActivityId);
-    const prevMsg = await Notification.findOne({
-      where: {targetURL: `/feedback.html?${corr.id}`},
-    });
     const corrMsg = data.msg.replace(/\n/g, '<br>');
     const course = stu.toJSON();
     let finalMsg;
@@ -216,12 +237,9 @@ module.exports = function(Correction) {
       targetURL: '#',
     });
     sgMail.send(msg);
-    if (prevMsg) {
-      prevMsg.destroy();
-    }
   });
 
-  Correction.remoteMethod('finishCorrectionAuto', {
+  Correction.remoteMethod('finishCorrection', {
     accepts: {
       arg: 'id',
       type: 'string',
@@ -255,6 +273,144 @@ module.exports = function(Correction) {
     },
     http: {
       path: '/:id/start',
+      verb: 'post',
+    },
+  });
+
+  Correction.finishManual = async function(id) {
+    const StudentActivity = Correction.app.models.StudentActivity;
+    const stAct = await Correction.findById(id, {include: 'studentActivity'});
+    const acts = stAct.toJSON();
+    if (
+      acts.studentActivity.corrector2Id &&
+      acts.studentActivity.corrector2Id !== '0'
+    ) {
+      const corr = await StudentActivity.findById(acts.studentActivity.id, {
+        include: 'corrections',
+      });
+      const corrs = corr.toJSON().corrections;
+      let results = {};
+      let cheat;
+      corrs.map(c => {
+        for (var ex in c) {
+          if (ex.match(/ex\d\d/g)) {
+            if (c[ex].works === 'Não') results[ex] = c[ex].works;
+            else if (results[ex] !== 'Não') {
+              results[ex] = c[ex].works;
+            }
+          }
+          if (ex === 'cheat') {
+            cheat = true;
+          }
+        }
+      });
+      console.log(results);
+      let exs = 0;
+      let right = 0;
+      for (var t in results) {
+        exs++;
+        if (results[t] === 'Sim') right++;
+      }
+      return {
+        corr,
+        acts,
+        grade: right / exs,
+        cheat,
+      };
+    }
+  };
+
+  Correction.afterRemote('finishManual', async function(ctx, data) {
+    console.log(data);
+    const Student = Correction.app.models.Student;
+    const Notification = Correction.app.models.Notification;
+    const StudentActivity = Correction.app.models.StudentActivity;
+    const corr = data.corr.toJSON();
+    console.log(corr, data.grade);
+    const stu = await Student.findById(corr.studentId, {
+      include: {course: 'activities'},
+    });
+    const stuCorr = await Student.findById(corr.correctorId);
+    const stuAct = await StudentActivity.findById(corr.id);
+    const course = stu.toJSON();
+    let finalMsg;
+    let stuChanges = {};
+    if (data.cheat) {
+      finalMsg =
+        '<b>A pessoa que te corrigiu indicou que você burlou as regras' +
+        'da correção, seja copiando código ou usando trechos que ' +
+        'não conseguiu explicar, portanto sua nota é zero e você ' +
+        'terá que refazer a fase</b>';
+      stuAct.finishedAt = undefined;
+      stuAct.correctorId = undefined;
+      stuAct.corrector2Id = undefined;
+      stuAct.fails++;
+    } else if (
+      data.grade >= course.course.activities[stu.activityNumber].minGrade
+    ) {
+      finalMsg =
+        'Parabéns, você passou de fase! Acesse a plataforma ' +
+        'para ver os próximos desafios.';
+      stuChanges.activityNumber = stu.activityNumber + 1;
+      if (stuAct.fails)
+        stuChanges.XPPoints =
+          stu.XPPoints + (data.grade * 100) / (stuAct.fails + 1);
+      else stuChanges.XPPoints = stu.XPPoints + 100 * data.grade;
+      StudentActivity.create({
+        studentId: stu.id,
+        activityId: course.course.activities[stuChanges.activityNumber].id,
+        createdAt: moment().toDate(),
+        fails: 0,
+      });
+    } else {
+      finalMsg =
+        'Com essa nota você não conseguiu avançar, corrija o ' +
+        'que estiver errado e finalize a atividade novamente.';
+      stuAct.finishedAt = undefined;
+      stuAct.correctorId = undefined;
+      stuAct.corrector2Id = undefined;
+      stuAct.fails++;
+    }
+    stuCorr.correctionPoints++;
+    stuCorr.save();
+    stuAct.save();
+    stu.updateAttributes(stuChanges);
+    const msg = {
+      to: stu.email,
+      from: {
+        email: 'contato@projetomarvin.com',
+        name: 'Marvin',
+      },
+      subject: 'Seu resultado!!',
+      html: `<p>
+      Resultado da correção:
+      Sua nota final foi ${Math.floor(data.grade * 100)}%.
+      ${finalMsg}
+      </p>`,
+    };
+    Notification.create({
+      studentId: corr.studentId,
+      createdAt: moment().toDate(),
+      message: `Sua correção terminou e a
+       nota final foi ${Math.floor(data.grade * 100)}%.
+       Veja seu e-mail para mais detalhes`,
+      targetURL: '#',
+    });
+    sgMail.send(msg);
+  });
+
+  Correction.remoteMethod('finishManual', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/finishManual',
       verb: 'post',
     },
   });

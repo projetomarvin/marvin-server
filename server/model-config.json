@@ -111,6 +111,7 @@
           "prototype.patchAttributes": true,
           "findById": true,
           "finishCorrection": true,
+          "finishManual": true,
           "startCorrection": true
         }
       }
