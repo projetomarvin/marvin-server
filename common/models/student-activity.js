@@ -25,6 +25,7 @@ module.exports = function(Studentactivity) {
     try {
       const data = await Promise.all(
         Act.exercises.map(async r => {
+          if (r.file[r.file.length - 1] === '*') r.file = r.file.slice(0, -2);
           const file = await axios(
             `https://api.github.com/repos/${stu.username}/marvin/contents/` +
               r.file +
@@ -65,7 +66,10 @@ module.exports = function(Studentactivity) {
     const id = ctx.req.params.id;
     const stActivity = await Studentactivity.findById(id, {include: 'student'});
     const student = stActivity.toJSON().student;
-    if (stActivity.finishedAt) {
+    if (
+      (stActivity.finishedAt && !stActivity.corrector2Id) ||
+      (stActivity.corrector2Id && stActivity.corrector2Id != 0)
+    ) {
       throw Error('atividade já finalizada');
     } else if (student.correctionPoints <= 0) {
       throw Error('pontos de correção insuficientes');
@@ -82,76 +86,80 @@ module.exports = function(Studentactivity) {
     const stu = await students.findById(stActivity.studentId);
     const Act = await Activity.findById(stActivity.activityId);
     const corrector = await students.findById(userId);
-    let folder;
-    let path = Act.exercises[0].file.split('/');
-    path = path[0];
-    if (fs.existsSync('/home/ubuntu/activityFiles')) {
-      folder = '/home/ubuntu/activityFiles';
-    } else {
-      folder = '/home/dante/Documents';
-    }
-    await execSync(`rm -rf ${folder}/${id}`);
-    await fs.mkdirSync(`${folder}/${id}`);
-    await fs.mkdirSync(`${folder}/${id}/${path}`);
-    await Promise.all(
-      Act.exercises.map(async r => {
-        let path2 = r.file.split('/');
-        path2.splice(-1, 1);
-        path2 = path2.join('/');
-        await execSync(`mkdir ${folder}/${id}/${path2}`);
-        const commits = await axios(
-          `https://api.github.com/repos/${stu.username}/marvin/commits` +
-            '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
-        );
-        const files = await axios(
-          'https://api.github.com/repos/' +
-            stu.username +
-            '/marvin/git/trees/' +
-            commits.data[0].sha +
-            '?recursive=1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
-        );
-        const currentFiles = files.data.tree.filter(obj => {
-          return obj.mode === '100644' && obj.path.includes(path2);
-        });
-        await Promise.all(
-          currentFiles.map(async f => {
-            const file = await axios(
-              `https://api.github.com/repos/${stu.username}/marvin/contents` +
-                f.path +
-                '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
-            );
-            await fs.writeFileSync(
-              `${folder}/${id}/${f.path}`,
-              file.data.content,
-              'base64'
-            );
-            console.log('file created');
-          })
-        );
-      })
-    );
-    await execSync(`zip -r ${folder}/${id}.zip ${folder}/${id}`);
-    await execSync(`rm -rf ${folder}/${id}`);
-    const file = await fs.readFileSync(`${folder}/${id}.zip`);
-    const up = new Promise(resolve => {
-      s3.upload(
-        {
-          Bucket: 'marvin-files',
-          ACL: 'public-read',
-          Key: `${id}.zip`,
-          Body: file,
-        },
-        (err, result) => {
-          fs.unlinkSync(`${folder}/${id}.zip`);
-          console.log(err, result);
-          resolve();
-        }
+    if (!stActivity.corrector2Id) {
+      let folder;
+      let path = Act.exercises[0].file.split('/');
+      path = path[0];
+      if (fs.existsSync('/home/ubuntu/activityFiles')) {
+        folder = '/home/ubuntu/activityFiles';
+      } else {
+        folder = '/home/dante/Documents';
+      }
+      await execSync(`rm -rf ${folder}/${id}`);
+      await fs.mkdirSync(`${folder}/${id}`);
+      await fs.mkdirSync(`${folder}/${id}/${path}`);
+      await Promise.all(
+        Act.exercises.map(async r => {
+          let path2 = r.file.split('/');
+          path2.splice(-1, 1);
+          path2 = path2.join('/');
+          await execSync(`mkdir ${folder}/${id}/${path2}`);
+          const commits = await axios(
+            `https://api.github.com/repos/${stu.username}/marvin/commits` +
+              '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+          );
+          const files = await axios(
+            'https://api.github.com/repos/' +
+              stu.username +
+              '/marvin/git/trees/' +
+              commits.data[0].sha +
+              '?recursive=1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+          );
+          const currentFiles = files.data.tree.filter(obj => {
+            return obj.mode === '100644' && obj.path.includes(path2);
+          });
+          await Promise.all(
+            currentFiles.map(async f => {
+              const file = await axios(
+                `https://api.github.com/repos/${stu.username}/marvin/contents` +
+                  f.path +
+                  '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+              );
+              await fs.writeFileSync(
+                `${folder}/${id}/${f.path}`,
+                file.data.content,
+                'base64'
+              );
+              console.log('file created');
+            })
+          );
+        })
       );
-    });
-    await up;
-    if (!Act.exercises[0].tests)
-      stActivity.corrector2Id = 0;
-    stActivity.correctorId = userId;
+      await execSync(`zip -r ${folder}/${id}.zip ${folder}/${id}`);
+      await execSync(`rm -rf ${folder}/${id}`);
+      const file = await fs.readFileSync(`${folder}/${id}.zip`);
+      const up = new Promise(resolve => {
+        s3.upload(
+          {
+            Bucket: 'marvin-files',
+            ACL: 'public-read',
+            Key: `${id}.zip`,
+            Body: file,
+          },
+          (err, result) => {
+            fs.unlinkSync(`${folder}/${id}.zip`);
+            console.log(err, result);
+            resolve();
+          }
+        );
+      });
+      await up;
+    }
+    console.log(stActivity.correctorId, stActivity.corrector2Id);
+    if (!stActivity.correctorId)
+      stActivity.correctorId = userId;
+    else
+      stActivity.corrector2Id = userId;
     stActivity.finishedAt = moment().toDate();
     stu.correctionPoints--;
     stu.save();
@@ -227,7 +235,10 @@ module.exports = function(Studentactivity) {
     }
     Correction.destroyById(lastCorr.id, e => console.log(e));
     Notification.destroyById(not.id, e => console.log(e));
-    curAct.correctorId = undefined;
+    if (!curAct.correction2Id)
+      curAct.correctorId = undefined;
+    else
+      curAct.corrector2Id = '0';
     curAct.finishedAt = undefined;
     curAct.save();
   };

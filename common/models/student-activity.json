@@ -18,6 +18,9 @@
     "correctorId": {
       "type": "string"
     },
+    "corrector2Id": {
+      "type": "string"
+    },
     "autocorrectionGrade": {
       "type": "number"
     }
