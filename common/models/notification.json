@@ -9,11 +9,6 @@
     "createdAt": {
       "type": "date"
     },
-    "read": {
-      "type": "boolean",
-      "required": true,
-      "default": false
-    },
     "message": {
       "type": "string",
       "required": true
