@@ -74,7 +74,7 @@ module.exports = function(Correction) {
     });
     await writeFile;
     await execSync(
-      'unzip ' +
+      'unzip -o ' +
         __dirname +
         '/../../../activityFiles/' +
         a.studentActivity.id +
