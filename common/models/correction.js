@@ -226,6 +226,10 @@ module.exports = function(Correction) {
       ${corrMsg}
       Sua nota final foi ${Math.floor(data.grade * 100)}%.
       ${finalMsg}
+      <br>
+      O link do arquivo e https://s3-sa-east-1.amazonaws.com/marvin-files/${
+        stuAct.id
+      }.zip
       </p>`,
     };
     Notification.create({
@@ -388,7 +392,7 @@ module.exports = function(Correction) {
       ${finalMsg}
       <br>
       O link do arquivo e https://s3-sa-east-1.amazonaws.com/marvin-files/${
-        stu.id
+        stuAct.id
       }.zip
       </p>`,
     };
