@@ -62,6 +62,34 @@ module.exports = function(Studentactivity) {
     },
   });
 
+  Studentactivity.getRandomCorrector = async function(actId) {
+    const sts = await Studentactivity.findById(actId, {
+      include: {student: {course: 'students'}},
+    });
+    let students = sts.toJSON().student.course.students;
+    students = students.filter((item) => {
+      return String(item.id) !== String(sts.studentId);
+    });
+    console.log(Math.round(Math.random() * (students.length - 1)));
+    return students[Math.round(Math.random() * (students.length - 1))];
+  };
+
+  Studentactivity.remoteMethod('getRandomCorrector', {
+    accepts: {
+      arg: 'actId',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/randomCorrector',
+      verb: 'get',
+    },
+  });
+
   Studentactivity.beforeRemote('finish', async function(ctx, data) {
     const id = ctx.req.params.id;
     const stActivity = await Studentactivity.findById(id, {include: 'student'});
@@ -156,10 +184,8 @@ module.exports = function(Studentactivity) {
       await up;
     }
     console.log(stActivity.correctorId, stActivity.corrector2Id);
-    if (!stActivity.correctorId)
-      stActivity.correctorId = userId;
-    else
-      stActivity.corrector2Id = userId;
+    if (!stActivity.correctorId) stActivity.correctorId = userId;
+    else stActivity.corrector2Id = userId;
     stActivity.finishedAt = moment().toDate();
     stu.correctionPoints--;
     stu.save();
@@ -235,10 +261,8 @@ module.exports = function(Studentactivity) {
     }
     Correction.destroyById(lastCorr.id, e => console.log(e));
     Notification.destroyById(not.id, e => console.log(e));
-    if (!curAct.correction2Id)
-      curAct.correctorId = undefined;
-    else
-      curAct.corrector2Id = '0';
+    if (!curAct.correction2Id) curAct.correctorId = undefined;
+    else curAct.corrector2Id = '0';
     curAct.finishedAt = undefined;
     curAct.save();
   };
