@@ -200,6 +200,10 @@ module.exports = function(Correction) {
         'Com essa nota você não conseguiu avançar, corrija o ' +
         'que estiver errado e finalize a atividade novamente.';
       stuAct.finishedAt = undefined;
+      if (stuAct.prevCorrectors)
+        stuAct.prevCorrectors.push(stuAct.correctorId);
+      else
+        stuAct.prevCorrectors = [stuAct.correctorId];
       stuAct.correctorId = undefined;
       stuAct.fails++;
     }
@@ -346,6 +350,10 @@ module.exports = function(Correction) {
         'não conseguiu explicar, portanto sua nota é zero e você ' +
         'terá que refazer a fase</b>';
       stuAct.finishedAt = undefined;
+      if (stuAct.prevCorrectors)
+        stuAct.prevCorrectors.push(stuAct.correctorId, stuAct.corrector2Id);
+      else
+        stuAct.prevCorrectors = [stuAct.correctorId, stuAct.corrector2Id];
       stuAct.correctorId = undefined;
       stuAct.corrector2Id = undefined;
       stuAct.fails++;

@@ -21,6 +21,11 @@
     "corrector2Id": {
       "type": "string"
     },
+    "prevCorrectors": {
+      "type": [
+          "string"
+        ]
+    },
     "autocorrectionGrade": {
       "type": "number"
     }
