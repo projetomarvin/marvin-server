@@ -338,7 +338,7 @@ module.exports = function(Correction) {
     const stu = await Student.findById(corr.studentId, {
       include: {course: 'activities'},
     });
-    const stuCorr = await Student.findById(corr.correctorId);
+    const stuCorr = await Student.findById(corr.corrector2Id);
     const stuAct = await StudentActivity.findById(corr.id);
     const course = stu.toJSON();
     let finalMsg;
