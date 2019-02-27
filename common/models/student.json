@@ -23,6 +23,9 @@
     },
     "githubAccessToken": {
       "type": "string"
+    },
+    "availableUntil": {
+      "type": "date"
     }
   },
   "validations": [],

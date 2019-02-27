@@ -62,33 +62,44 @@ module.exports = function(Studentactivity) {
     },
   });
 
-  Studentactivity.getRandomCorrector = async function(actId) {
+  async function randomCorrector(actId) {
     const sts = await Studentactivity.findById(actId, {
       include: {student: {course: 'students'}},
     });
     let students = sts.toJSON().student.course.students;
-    students = students.filter((item) => {
-      return String(item.id) !== String(sts.studentId);
+    const currStudent = sts.toJSON().student;
+    const list = [];
+    const obj = {};
+    students = students.filter(item => {
+      return (
+        String(item.id) !== String(sts.studentId) &&
+        item.availableUntil > new Date()
+      );
     });
-    console.log(Math.round(Math.random() * (students.length - 1)));
-    return students[Math.round(Math.random() * (students.length - 1))];
-  };
-
-  Studentactivity.remoteMethod('getRandomCorrector', {
-    accepts: {
-      arg: 'actId',
-      type: 'string',
-      required: true,
-    },
-    returns: {
-      arg: 'events',
-      root: true,
-    },
-    http: {
-      path: '/:id/randomCorrector',
-      verb: 'get',
-    },
-  });
+    let sum = 0;
+    students.map(st => {
+      let cpoints = 5 - st.correctionPoints;
+      cpoints = cpoints < 1 ? 0.5 : cpoints ** 2;
+      let lvl = 3 - Math.abs(currStudent.activityNumber - st.activityNumber);
+      lvl = lvl < 1 ? 0.5 : lvl ** 2;
+      list.push({[st.id]: cpoints + lvl});
+      sum += cpoints + lvl;
+    });
+    console.log(list);
+    list.map(u => {
+      for (var usr in u) {
+        if (u.hasOwnProperty(usr)) {
+          obj[usr] = u[usr] / sum;
+        }
+      }
+    });
+    let sum2 = 0;
+    let r = Math.random();
+    for (var idx in obj) {
+      sum2 += obj[idx];
+      if (r <= sum2) return idx;
+    }
+  }
 
   Studentactivity.beforeRemote('finish', async function(ctx, data) {
     const id = ctx.req.params.id;
@@ -105,11 +116,16 @@ module.exports = function(Studentactivity) {
     return;
   });
 
-  Studentactivity.finish = async function(userId, id) {
+  Studentactivity.finish = async function(id) {
     const Activity = Studentactivity.app.models.Activity;
     const students = Studentactivity.app.models.Student;
     const courses = Studentactivity.app.models.Course;
     const correction = Studentactivity.app.models.Correction;
+    const userId = await randomCorrector(id);
+    if (!userId) {
+      throw Error('Não há nenum corretor disponível');
+    }
+    console.log(userId);
     const stActivity = await Studentactivity.findById(id);
     const stu = await students.findById(stActivity.studentId);
     const Act = await Activity.findById(stActivity.activityId);
@@ -219,11 +235,6 @@ module.exports = function(Studentactivity) {
 
   Studentactivity.remoteMethod('finish', {
     accepts: [
-      {
-        arg: 'userId',
-        type: 'string',
-        required: true,
-      },
       {
         arg: 'id',
         type: 'string',
