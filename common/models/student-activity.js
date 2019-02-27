@@ -141,7 +141,8 @@ module.exports = function(Studentactivity) {
               stu.username +
               '/marvin/git/trees/' +
               commits.data[0].sha +
-              '?recursive=1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+              '?recursive=' +
+              '1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
           );
           const currentFiles = files.data.tree.filter(obj => {
             return obj.mode === '100644' && obj.path.includes(path2);
