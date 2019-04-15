@@ -2,6 +2,19 @@
 const fs = require('fs');
 const {VM} = require('vm2');
 
+function usesFor(txt) {
+  let fileFor = txt.match(/[^a-zA-Z\d"'`]for[^a-zA-Z\d]/g);
+  if (!fileFor) fileFor = 0;
+  else fileFor = fileFor.length;
+  let stringFor = txt.match(/(["'`])(?:(?=(\\?))\2.)*?\1/g);
+  if (stringFor) {
+    stringFor = stringFor.join(' ').match(/[^a-zA-Z\d"'`]for[^a-zA-Z\d]/g);
+    if (stringFor) stringFor = stringFor.length;
+    else stringFor = 0;
+  } else stringFor = 0;
+  return fileFor !== stringFor;
+}
+
 module.exports = async function(level, param, id) {
   let folder, log;
   let result = {};
@@ -28,6 +41,7 @@ module.exports = async function(level, param, id) {
   let file = fs.readFileSync(levelPath, 'utf-8');
   const functionFile = file.match(/(fun.*{[\s\S]*}[\s]*$)/g);
   if (!functionFile) return 'Função inválida!';
+  if (usesFor(functionFile[0])) return 'Uso de laço for identificado';
   file = functionFile[0] + '\n ' + levelName + '(' + params + ')';
   const vm = new VM({
     sandbox: {
