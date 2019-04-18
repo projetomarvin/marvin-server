@@ -161,7 +161,7 @@ module.exports = function(Studentactivity) {
               '1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
           );
           const currentFiles = files.data.tree.filter(obj => {
-            return obj.mode === '100644' && obj.path.includes(path2);
+            return obj.mode === '100644' && obj.path === r.file;
           });
           await Promise.all(
             currentFiles.map(async f => {
