@@ -242,7 +242,7 @@ module.exports = function(Correction) {
       message: `Sua correção terminou e a
        nota final foi ${Math.floor(data.grade * 100)}%.
        Veja seu e-mail para mais detalhes`,
-      targetURL: '#',
+      targetURL: '/detalheNota.html?' + corr.id,
     });
     sgMail.send(msg);
   });
