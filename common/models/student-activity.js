@@ -67,12 +67,31 @@ module.exports = function(Studentactivity) {
       include: {student: {course: 'students'}},
     });
     let students = sts.toJSON().student.course.students;
+    const prevAct = await Studentactivity.find({
+      where: {studentId: students.studentId},
+      order: 'createdAt DESC',
+      limit: 2,
+    });
+    let corrs;
+    if (prevAct[1]) {
+      corrs = [
+        sts.prevCorrectors,
+        prevAct[1].correctorId,
+        prevAct[1].corrector2Id,
+      ];
+    } else {
+      corrs = [
+        sts.prevCorrectors,
+      ];
+    }
     const currStudent = sts.toJSON().student;
     const list = [];
     const obj = {};
     students = students.filter(item => {
+      const id = String(item.id);
       return (
-        String(item.id) !== String(sts.studentId) &&
+        id !== String(sts.studentId) &&
+        !corrs.includes(id) &&
         item.availableUntil > new Date()
       );
     });
