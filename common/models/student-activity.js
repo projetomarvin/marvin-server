@@ -87,7 +87,7 @@ module.exports = function(Studentactivity) {
       return (
         id !== String(sts.studentId) &&
         !corrs.includes(id) &&
-        item.availableUntil > new Date()
+        new Date(item.availableUntil) > new Date()
       );
     });
     let sum = 0;
