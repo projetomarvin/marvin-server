@@ -3,8 +3,7 @@ const axios = require('axios');
 const moment = require('moment');
 const sgMail = require('@sendgrid/mail');
 
-const sgKey =
-  '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';
+const sgKey = process.env.SENDGRID_API_KEY;
 
 module.exports = function(Student) {
   Student.disableRemoteMethodByName('prototype.__get__notifications');
@@ -24,7 +23,7 @@ module.exports = function(Student) {
   });
 
   Student.checkRepository = function(username, id, cb) {
-    const url = `https://api.github.com/repos/${username}/marvin?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1`;
+    const url = `https://api.github.com/repos/${username}/marvin?access_token=${process.env.GITHUB_TOKEN}`;
     axios
       .get(url)
       .then(res => {
@@ -76,8 +75,8 @@ module.exports = function(Student) {
     if (ctx.req.body.githubAccessToken) {
       axios
         .post('https://github.com/login/oauth/access_token', {
-          client_id: '71f8116e373c16f3eb11',
-          client_secret: '963642187139722787a001456c34002985a9f22c',
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
           code: ctx.req.body.githubAccessToken,
         })
         .then(r => {

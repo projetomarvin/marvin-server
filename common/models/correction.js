@@ -6,8 +6,7 @@ const fs = require('fs');
 const {execSync} = require('child_process');
 const check = require('../../tester/index.js');
 
-const sgKey =
-  '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';
+const sgKey = process.env.SENDGRID_API_KEY;
 sgMail.setApiKey(sgKey);
 
 module.exports = function(Correction) {

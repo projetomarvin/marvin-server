@@ -4,12 +4,9 @@ const axios = require('axios');
 const fs = require('fs');
 const {exec, execSync} = require('child_process');
 const AWS = require('aws-sdk');
-const sgMail = require('@sendgrid/mail');
 
-const sgKey =
-  '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';
 const credentials = new AWS.SharedIniFileCredentials({profile: 'cori'});
-sgMail.setApiKey(sgKey);
+
 AWS.config.region = 'sa-east-1';
 AWS.config.credentials = credentials;
 
@@ -29,7 +26,7 @@ module.exports = function(Studentactivity) {
           const file = await axios(
             `https://api.github.com/repos/${stu.username}/marvin/contents/` +
               r.file +
-              '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+              '?access_token=' + process.env.GITHUB_TOKEN
           );
           console.log(file.data.path);
           return file.data;
@@ -167,7 +164,7 @@ module.exports = function(Studentactivity) {
           await execSync(`mkdir ${folder}/${id}/${path2}`);
           const commits = await axios(
             `https://api.github.com/repos/${stu.username}/marvin/commits` +
-              '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+              '?access_token=' + process.env.GITHUB_TOKEN
           );
           const files = await axios(
             'https://api.github.com/repos/' +
@@ -175,7 +172,7 @@ module.exports = function(Studentactivity) {
               '/marvin/git/trees/' +
               commits.data[0].sha +
               '?recursive=' +
-              '1&access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+              '1&access_token=' + process.env.GITHUB_TOKEN
           );
           const currentFiles = files.data.tree.filter(obj => {
             return obj.mode === '100644' && obj.path === r.file;
@@ -185,7 +182,7 @@ module.exports = function(Studentactivity) {
               const file = await axios(
                 `https://api.github.com/repos/${stu.username}/marvin/contents` +
                   f.path +
-                  '?access_token=2551f7fdc3e1bfc7f556b888384a7e7657bdf0e1'
+                  '?access_token=' + process.env.GITHUB_TOKEN
               );
               await fs.writeFileSync(
                 `${folder}/${id}/${f.path}`,
