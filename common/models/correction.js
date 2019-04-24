@@ -214,6 +214,8 @@ module.exports = function(Correction) {
     }
     stuCorr.XPPoints += 20 * precision;
     stuCorr.correctionPoints++;
+    stuCorr.availableUntil = undefined;
+    stu.availableUntil = undefined;
     stuCorr.save();
     stuAct.save();
     stu.updateAttributes(stuChanges);
@@ -264,7 +266,12 @@ module.exports = function(Correction) {
   });
 
   Correction.startCorrection = async function(id) {
-    const corr = await Correction.findById(id);
+    const Student = Correction.app.models.Student;
+    const corr = await Correction.findById(id, {include: 'studentActivity'});
+    const stu = await Student.findById(corr.toJSON().studentActivity.studentId);
+    const stuCorr =  await Student.findById(corr.correctorId);
+    stu.updateAttributes({availableUntil: 'correction'});
+    stuCorr.updateAttributes({availableUntil: 'correction'});
     corr.started = true;
     corr.save();
   };

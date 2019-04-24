@@ -25,7 +25,7 @@
       "type": "string"
     },
     "availableUntil": {
-      "type": "date"
+      "type": "any"
     }
   },
   "validations": [],

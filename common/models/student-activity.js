@@ -68,21 +68,19 @@ module.exports = function(Studentactivity) {
     });
     let students = sts.toJSON().student.course.students;
     const prevAct = await Studentactivity.find({
-      where: {studentId: students.studentId},
+      where: {studentId: sts.studentId},
       order: 'createdAt DESC',
       limit: 2,
     });
     let corrs;
     if (prevAct[1]) {
       corrs = [
-        sts.prevCorrectors,
-        prevAct[1].correctorId,
-        prevAct[1].corrector2Id,
+        sts.prevCorrectors || '',
+        prevAct[1].correctorId || '',
+        prevAct[1].corrector2Id || '',
       ];
     } else {
-      corrs = [
-        sts.prevCorrectors,
-      ];
+      corrs = [sts.prevCorrectors || ''];
     }
     const currStudent = sts.toJSON().student;
     const list = [];
@@ -137,7 +135,7 @@ module.exports = function(Studentactivity) {
 
   Studentactivity.finish = async function(id) {
     const Activity = Studentactivity.app.models.Activity;
-    const students = Studentactivity.app.models.Student;
+    const Students = Studentactivity.app.models.Student;
     const courses = Studentactivity.app.models.Course;
     const correction = Studentactivity.app.models.Correction;
     const userId = await randomCorrector(id);
@@ -146,9 +144,9 @@ module.exports = function(Studentactivity) {
     }
     console.log(userId);
     const stActivity = await Studentactivity.findById(id);
-    const stu = await students.findById(stActivity.studentId);
+    const stu = await Students.findById(stActivity.studentId);
     const Act = await Activity.findById(stActivity.activityId);
-    const corrector = await students.findById(userId);
+    const corrector = await Students.findById(userId);
     if (!stActivity.corrector2Id) {
       let folder;
       let path = Act.exercises[0].file.split('/');

@@ -72,7 +72,7 @@ module.exports = function(Student) {
     }
   });
 
-  Student.beforeRemote('prototype.patchAttributes', function(ctx, data, next) {
+  Student.beforeRemote('prototype.patchAttributes', async function(ctx, data, next) {
     if (ctx.req.body.githubAccessToken) {
       axios
         .post('https://github.com/login/oauth/access_token', {
@@ -91,6 +91,14 @@ module.exports = function(Student) {
             next(err);
           }
         });
+    }
+    else if (ctx.req.body.availableUntil) {
+      const uId = ctx.req.accessToken.userId.toJSON();
+      const st = await Student.findById(uId)
+      console.log(st);
+      if (st.availableUntil === "correction") {
+        throw "Você está em uma correção"
+      }
     } else {
       next();
     }
