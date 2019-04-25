@@ -214,7 +214,7 @@ module.exports = function(Correction) {
     stuCorr.XPPoints += 20 * precision;
     stuCorr.correctionPoints++;
     stuCorr.availableUntil = undefined;
-    stu.availableUntil = undefined;
+    stuChanges.availableUntil = undefined;
     stuCorr.save();
     stuAct.save();
     stu.updateAttributes(stuChanges);
