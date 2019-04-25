@@ -26,6 +26,9 @@
     },
     "availableUntil": {
       "type": "any"
+    },
+    "panic": {
+      "type": "boolean"
     }
   },
   "validations": [],
