@@ -113,7 +113,11 @@ module.exports = function(Correction) {
         a.studentActivity.id +
         '.zip'
     );
-    const correction = await check.runTest(Act.exercises, a.studentActivity.id);
+    const correction = await check.runTest(
+      Act.exercises,
+      a.studentActivity.id,
+      Act.exercises[0].file.includes('.py')
+    );
     await execSync(
       'rm -rf ' + __dirname + '/../../../activityFiles/' + a.studentActivity.id
     );
