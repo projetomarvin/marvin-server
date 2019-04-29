@@ -91,9 +91,9 @@ module.exports = function(Student) {
           }
         });
     }
-    else if (ctx.req.body.availableUntil) {
+    else if (ctx.req.body.availableUntil && ctx.req.body.availableUntil !== "available") {
       const uId = ctx.req.accessToken.userId.toJSON();
-      const st = await Student.findById(uId)
+      const st = await Student.findById(uId);
       console.log(st);
       if (st.availableUntil === "correction") {
         throw "Você está em uma correção"
