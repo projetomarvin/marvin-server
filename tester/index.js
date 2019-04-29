@@ -1,18 +1,24 @@
 'use strict';
 const check = require('./check.js');
+const pyCheck = require('./pycheck.js');
 
 function arraysEqual(arr1, arr2) {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
 
 module.exports = {
-  runTest: async function(fase, id) {
+  runTest: async function(fase, id, python) {
     const run = Promise.all(
       fase.map(async function(e, i) {
         const a = Promise.all(
           e.tests.map(async t => {
+            let test;
             if (!t.output) t.output = '';
-            let test = await check(e.file, t.param, id);
+            if (python) {
+              test = await pyCheck(e.file, t.param, id); // for PY
+            } else {
+              test = await check(e.file, t.param, id); // for JS
+            }
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
             }
@@ -34,11 +40,22 @@ module.exports = {
             };
             if (typeof test !== 'object') {
               answer.correct = false;
-              answer.test = test;
+              answer.test = 'testando parametro(s) ' +
+              JSON.stringify(t.param) +
+              '\nO resultado esperado era ' +
+              JSON.stringify(t.result) +
+              ' e o obtido foi ' +
+              test;
               return answer;
             } else if (t.function) {
-              let test2 = await check(e.file, t.param, id);
-              let test3 = await check(e.file, t.param, id);
+              let test2, test3;
+              if (python) {
+                test2 = await pyCheck(e.file, t.param, id);
+                test3 = await pyCheck(e.file, t.param, id);
+              } else {
+                test2 = await check(e.file, t.param, id);
+                test3 = await check(e.file, t.param, id);
+              }
               console.log('!TO RODANDO A FUNCAO', t.function, eval(t.function));
               answer.test = 'testando na função: ' + t.function;
               if (eval(t.function)) {
