@@ -217,10 +217,11 @@ module.exports = function(Correction) {
     }
     stuCorr.XPPoints += 20 * precision;
     stuCorr.correctionPoints++;
-    stuCorr.availableUntil = undefined;
-    stuChanges.availableUntil = undefined;
+    stuCorr.availableUntil = 0;
+    stuChanges.availableUntil = 0;
     stuCorr.save();
     stuAct.save();
+    console.log(stuChanges);
     stu.updateAttributes(stuChanges);
     const msg = {
       to: stu.email,
