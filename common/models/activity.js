@@ -43,7 +43,7 @@ module.exports = function(Activity) {
             CallerReference: String(moment().unix()),
             Paths: {
               Quantity: 1,
-              Items: ['/' + Key],
+              Items: [Key],
             },
           },
         },
