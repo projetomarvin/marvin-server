@@ -71,27 +71,49 @@ module.exports = function(Student) {
     }
   });
 
-  Student.beforeRemote('prototype.patchAttributes', async function(ctx, data, next) {
-    if (ctx.req.body.githubAccessToken) {
-      axios
-        .post('https://github.com/login/oauth/access_token', {
-          client_id: process.env.GITHUB_CLIENT_ID,
-          client_secret: process.env.GITHUB_CLIENT_SECRET,
-          code: ctx.req.body.githubAccessToken,
-        })
-        .then(r => {
-          const token = r.data.split('=')[1].split('&')[0];
-          if (token !== 'bad_verification_code') {
-            ctx.req.body.githubAccessToken = token;
-            next();
-          } else {
-            const err = new Error();
-            err.status = 500;
-            next(err);
-          }
-        });
-    }
-    else if (ctx.req.body.availableUntil && ctx.req.body.availableUntil !== "available") {
+  Student.linkGithub = async function(token, id) {
+    console.log(id, token);
+    const student = await Student.findById(id);
+    return axios
+      .post('https://github.com/login/oauth/access_token', {
+        client_id: "71f8116e373c16f3eb11",
+        client_secret: "963642187139722787a001456c34002985a9f22c",
+        code: token,
+      })
+      .then(r => {
+        const authToken = r.data.split('=')[1].split('&')[0];
+        console.log(authToken);
+        if (authToken !== 'bad_verification_code') {
+          student.updateAttributes({githubAccessToken: authToken})
+          return authToken;
+        } else {
+          const err = new Error();
+          err.status = 500;
+          return err;
+        }
+      });
+  }
+
+  Student.remoteMethod('linkGithub', {
+    accepts: [
+      {
+        arg: 'token',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'pushes content to saveGithub',
+    http: {path: '/:id/linkGithub', verb: 'post'},
+  });
+
+  Student.beforeRemote('prototype.patchAttributes', async function(ctx, data) {
+     if (ctx.req.body.availableUntil && ctx.req.body.availableUntil !== "available") {
       const uId = ctx.req.accessToken.userId.toJSON();
       const st = await Student.findById(uId);
       console.log(st);
@@ -99,9 +121,14 @@ module.exports = function(Student) {
         throw "Você está em uma correção"
       }
     } else {
-      next();
+      return;
     }
   });
+
+  Student.afterRemote("prototype.patchAttributes", function(ctx, data, next) {
+    console.log(112, data);
+    next();
+  })
 
   function gitPush(usr, data, sha) {
     axios
