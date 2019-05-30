@@ -28,6 +28,9 @@
     },
     "autocorrectionGrade": {
       "type": "number"
+    },
+    "language": {
+      "type": "string"
     }
   },
   "validations": [],
