@@ -55,6 +55,7 @@ module.exports = function(Correction) {
     const stAct = await StudentActivity.findById(corr.studentActivityId);
     const Act = await Activity.findById(stAct.activityId);
     const stCorr = await Student.findById(corr.correctorId);
+    const stu = await Student.findById(stAct.studentId);
     const prevMsg = await Notification.findOne({
       where: {targetURL: `/feedback.html?${corr.id}`},
     });
@@ -62,6 +63,13 @@ module.exports = function(Correction) {
       stAct.updateAttributes({corrector2Id: 0});
       stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1});
     }
+    stCorr.correctionPoints++;
+    stCorr.availableUntil = 0;
+    stCorr.updateAttributes({
+      correctionPoints: stCorr.correctionPoints + 1,
+      availableUntil: 0,
+    });
+    stu.updateAttributes({availableUntil: 0});
     if (prevMsg) {
       prevMsg.destroy();
     }
@@ -216,9 +224,6 @@ module.exports = function(Correction) {
       }
     }
     stuCorr.XPPoints += 20 * precision;
-    stuCorr.correctionPoints++;
-    stuCorr.availableUntil = 0;
-    stuChanges.availableUntil = 0;
     stuCorr.save();
     stuAct.save();
     console.log(stuChanges);
@@ -307,7 +312,8 @@ module.exports = function(Correction) {
       const corr = await StudentActivity.findById(acts.studentActivity.id, {
         include: 'corrections',
       });
-      const corrs = corr.toJSON().corrections;
+      const ex = corr.toJSON().corrections.reverse();
+      const corrs = [ex[0], ex[1]];
       let results = {};
       let cheat;
       corrs.map(c => {
