@@ -211,10 +211,8 @@ module.exports = function(Correction) {
         'Com essa nota você não conseguiu avançar, corrija o ' +
         'que estiver errado e finalize a atividade novamente.';
       stuAct.finishedAt = undefined;
-      if (stuAct.prevCorrectors)
-        stuAct.prevCorrectors.push(stuAct.correctorId);
-      else
-        stuAct.prevCorrectors = [stuAct.correctorId];
+      if (stuAct.prevCorrectors) stuAct.prevCorrectors.push(stuAct.correctorId);
+      else stuAct.prevCorrectors = [stuAct.correctorId];
       stuAct.correctorId = undefined;
       stuAct.fails++;
     }
@@ -278,7 +276,7 @@ module.exports = function(Correction) {
     const Student = Correction.app.models.Student;
     const corr = await Correction.findById(id, {include: 'studentActivity'});
     const stu = await Student.findById(corr.toJSON().studentActivity.studentId);
-    const stuCorr =  await Student.findById(corr.correctorId);
+    const stuCorr = await Student.findById(corr.correctorId);
     stu.updateAttributes({availableUntil: 'correction'});
     stuCorr.updateAttributes({availableUntil: 'correction'});
     corr.started = true;
@@ -369,8 +367,7 @@ module.exports = function(Correction) {
       stuAct.finishedAt = undefined;
       if (stuAct.prevCorrectors)
         stuAct.prevCorrectors.push(stuAct.correctorId, stuAct.corrector2Id);
-      else
-        stuAct.prevCorrectors = [stuAct.correctorId, stuAct.corrector2Id];
+      else stuAct.prevCorrectors = [stuAct.correctorId, stuAct.corrector2Id];
       stuAct.correctorId = undefined;
       stuAct.corrector2Id = undefined;
       stuAct.fails++;
