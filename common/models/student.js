@@ -116,7 +116,6 @@ module.exports = function(Student) {
      if (ctx.req.body.availableUntil && ctx.req.body.availableUntil !== "available") {
       const uId = ctx.req.accessToken.userId.toJSON();
       const st = await Student.findById(uId);
-      console.log(st);
       if (st.availableUntil === "correction") {
         throw "Você está em uma correção"
       }
@@ -124,11 +123,6 @@ module.exports = function(Student) {
       return;
     }
   });
-
-  Student.afterRemote("prototype.patchAttributes", function(ctx, data, next) {
-    console.log(112, data);
-    next();
-  })
 
   function gitPush(usr, data, sha) {
     axios
