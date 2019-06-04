@@ -229,6 +229,7 @@ module.exports = function(Studentactivity) {
     const corr = await correction.create({
       studentActivityId: id,
       correctorId: userId,
+      studentId: stActivity.studentId,
       createdAt: moment().toDate(),
     });
     console.log(corr);

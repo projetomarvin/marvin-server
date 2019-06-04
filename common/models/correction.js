@@ -124,7 +124,7 @@ module.exports = function(Correction) {
     const correction = await check.runTest(
       Act.exercises,
       a.studentActivity.id,
-      Act.exercises[0].file.includes('.py')
+      a.studentActivity.language === 'py'
     );
     await execSync(
       'rm -rf ' + __dirname + '/../../../activityFiles/' + a.studentActivity.id
@@ -442,6 +442,29 @@ module.exports = function(Correction) {
     http: {
       path: '/:id/finishManual',
       verb: 'post',
+    },
+  });
+
+  Correction.owned = async function(id) {
+    const corrs = await Correction.find({
+      where: {or: [{correctorId: id}, {studentId: id}]},
+    });
+    return corrs;
+  };
+
+  Correction.remoteMethod('owned', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/own',
+      verb: 'get',
     },
   });
 };
