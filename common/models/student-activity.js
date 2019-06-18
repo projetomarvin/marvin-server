@@ -74,16 +74,16 @@ module.exports = function(Studentactivity) {
       limit: 2,
     });
     let corrs;
-    console.log(prevAct[1]);
     if (prevAct[1]) {
       corrs = [
-        sts.prevCorrectors || '',
+        ...sts.prevCorrectors || '',
         prevAct[1].correctorId || '',
         prevAct[1].corrector2Id || '',
       ];
     } else {
-      corrs = [sts.prevCorrectors || ''];
+      corrs = [...sts.prevCorrectors || ''];
     }
+
     const currStudent = sts.toJSON().student;
     const list = [];
     const obj = {};
@@ -299,10 +299,16 @@ module.exports = function(Studentactivity) {
     }
     Correction.destroyById(lastCorr.id, e => console.log(e));
     Notification.destroyById(not.id, e => console.log(e));
-    if (!curAct.correction2Id) curAct.correctorId = undefined;
-    else curAct.corrector2Id = '0';
-    curAct.finishedAt = undefined;
-    curAct.save();
+    let newCurAct = {};
+    if (!curAct.correction2Id) newCurAct.correctorId = '';
+    else newCurAct.corrector2Id = '0';
+    if (!curAct.prevCorrectors)
+      newCurAct.prevCorrectors = [lastCorr.correctorId];
+    else
+      newCurAct.prevCorrectors =  [...curAct.prevCorrectors, lastCorr.correctorId];
+    newCurAct.finishedAt = 0;
+    console.log(newCurAct);
+    curAct.updateAttributes(newCurAct, (e, d) => console.log(e, d));
   };
 
   Studentactivity.remoteMethod('cancelCorrection', {
