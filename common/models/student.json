@@ -52,6 +52,11 @@
       "type": "hasMany",
       "model": "notification",
       "foreignKey": ""
+    },
+    "levelLogs": {
+      "type": "hasMany",
+      "model": "levelLog",
+      "foreignKey": ""
     }
   },
   "acls": [
@@ -96,6 +101,13 @@
       "principalId": "facilitator",
       "permission": "ALLOW",
       "property": "patchAttributes"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__create__levelLogs"
     }
   ],
   "methods": {}

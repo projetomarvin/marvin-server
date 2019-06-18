@@ -80,7 +80,8 @@
           "pushToGit": true,
           "checkRepository": true,
           "prototype.patchAttributes": true,
-          "linkGithub": true
+          "linkGithub": true,
+          "prototype.__create__levelLogs": true
         }
       }
     }
@@ -139,5 +140,9 @@
   "feedback": {
     "dataSource": "mongodb",
     "public": false
+  },
+  "levelLog": {
+    "dataSource": "mongodb",
+    "public": true
   }
 }

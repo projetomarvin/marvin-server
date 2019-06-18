@@ -146,7 +146,13 @@ module.exports = function(Student) {
   }
 
   Student.pushToGit = async function(data, id, cb) {
+    const LevelLog = Student.app.models.levelLog;
     const usr = await Student.findById(id);
+    LevelLog.create({
+      userId: id,
+      timestamp: new Date(),
+      file: data.path
+    })
     return axios(
       `https://api.github.com/repos/${usr.username}/marvin/contents/${
         data.path
