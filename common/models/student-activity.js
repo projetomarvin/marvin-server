@@ -233,6 +233,12 @@ module.exports = function(Studentactivity) {
       createdAt: moment().toDate(),
     });
     console.log(corr);
+    const corrData = {
+      studentName: stu.username,
+      level: stu.activityNumber,
+      correctionId: corr.id,
+    };
+    corrector.updateAttributes({pendingCorrection: corrData});
     return {
       filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`,
       corrector: corrector,

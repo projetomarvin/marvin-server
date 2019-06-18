@@ -29,6 +29,9 @@
     },
     "panic": {
       "type": "boolean"
+    },
+    "pendingCorrection": {
+      "type": "object"
     }
   },
   "validations": [],
