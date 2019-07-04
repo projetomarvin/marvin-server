@@ -277,6 +277,54 @@ module.exports = function(Studentactivity) {
     },
   });
 
+  Studentactivity.answerCorrectionInvite = async function(id, data) {
+    console.log(data);
+    const Correction = Studentactivity.app.models.Correction;
+    const Notification = Studentactivity.app.models.Notification;
+    const Student = Studentactivity.app.models.Student;
+    const corr = await Correction.findById(id);
+    const curAct = await Studentactivity.findById(corr.studentActivityId);
+    const stu = await Student.findById(curAct.studentId);
+    const stuCorr = await Student.findById(corr.correctorId);
+    await stuCorr.updateAttributes({pendingCorrection: null});
+    if (data.answer === 'false') {
+      const not = await Notification.findOne({
+        where: {targetURL: `/correcao.html?${id}`},
+      });
+      let newCurAct = {};
+      if (!curAct.correction2Id) newCurAct.correctorId = '';
+      else newCurAct.correctorId = '0';
+      if (!curAct.prevCorrectors)
+        newCurAct.prevCorrectors = [corr.correctorId];
+      else
+        newCurAct.prevCorrectors =  [...curAct.prevCorrectors, corr.correctorId];
+      newCurAct.finishedAt = 0;
+      await stu.updateAttributes({correctionPoints: stu.correctionPoints + 1});
+      console.log('update');
+      curAct.updateAttributes(newCurAct, (e, d) => console.log(e, d));
+      await Correction.destroyById(id);
+      await Notification.destroyById(not.id);
+    }
+  }
+
+  Studentactivity.remoteMethod('answerCorrectionInvite', {
+    accepts: [
+      {
+        arg: 'id', type: 'string', required: true,
+      }, {
+        arg: 'data', type: 'object', required: false, http: {source: 'body'},
+      },
+    ],
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/answerCorrectionInvite',
+      verb: 'put',
+    },
+  });
+
   Studentactivity.cancelCorrection = async function(id) {
     const Correction = Studentactivity.app.models.Correction;
     const Notification = Studentactivity.app.models.Notification;
