@@ -81,6 +81,7 @@
           "checkRepository": true,
           "prototype.patchAttributes": true,
           "linkGithub": true,
+          "prototype.__destroyById__notifications": true,
           "prototype.__create__levelLogs": true
         }
       }
@@ -98,6 +99,7 @@
           "findById": true,
           "prototype.patchAttributes": true,
           "cancelCorrection": true,
+          "answerCorrectionInvite": true,
           "redo": true
         }
       }
@@ -115,6 +117,7 @@
           "finishCorrection": true,
           "finishManual": true,
           "startCorrection": true,
+          "prototype.__create__feedbacks": true,
           "owned": true
         }
       }
