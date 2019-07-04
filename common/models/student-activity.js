@@ -22,8 +22,8 @@ module.exports = function(Studentactivity) {
     try {
       const data = await Promise.all(
         Act.exercises.map(async r => {
-          if (r.file[r.file.length - 2] === '.')
-            r.file = r.file.slice(0, -1) + stActivity.language;
+          if (r.file[r.file.length - 2] === 'j')
+            r.file = r.file.slice(0, -2) + stActivity.language;
           else if (r.file[r.file.length - 1] === '*')
             r.file = r.file.slice(0, -2);
           console.log(r.file);
