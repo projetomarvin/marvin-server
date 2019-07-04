@@ -1,5 +1,5 @@
 {
-  "extends": "airbnb",
+  "extends": "loopback",
   "parserOptions": {
         "ecmaVersion": 2017
     }
