@@ -14,6 +14,7 @@ module.exports = function(Student) {
   Student.disableRemoteMethodByName('prototype.__count__notifications');
   Student.beforeRemote('login', function(ctx, data, next) {
     const body = ctx.req.body;
+    body.ttl = 14400;
     if (body.user.includes('@')) {
       body.email = body.user;
     } else {
