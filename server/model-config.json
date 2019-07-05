@@ -82,6 +82,8 @@
           "prototype.patchAttributes": true,
           "linkGithub": true,
           "prototype.__destroyById__notifications": true,
+          "buyCPoint": true,
+          "transferCoins": true,
           "prototype.__create__levelLogs": true
         }
       }

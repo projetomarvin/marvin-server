@@ -235,4 +235,62 @@ module.exports = function(Student) {
     description: 'gets username from id',
     http: {path: '/:id/username', verb: 'get'},
   });
+
+  Student.buyCPoint = async function(id) {
+    const stu =  await Student.findById(id);
+    const changes = {};
+    if (stu.coins < 80) {
+      throw "Moedas insuficientes!"
+    }
+    changes.correctionPoints = stu.correctionPoints + 1;
+    changes.coins = stu.coins - 80;
+    stu.updateAttributes(changes);
+    return true
+  }
+
+    Student.remoteMethod('buyCPoint', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'Buys one correction point with coins',
+    http: {path: '/:id/buyCPoint', verb: 'put'},
+  });
+
+  Student.transferCoins = async function(id, data) {
+    const stuFrom =  await Student.findById(id);
+    const stuTo =  await Student.findOne({where: {username: data.to}});
+    if (stuFrom.coins < data.value)
+      throw "Moedas insuficientes!"
+    else if (data.value < 1 || data.value % 1 !== 0)
+      throw "Valor inválido!"
+    else if (!stuTo)
+      throw "Destinatário inválido!"
+    stuFrom.updateAttributes({coins: stuFrom.coins - data.value});
+    stuTo.updateAttributes({coins: stuTo.coins + data.value});
+    return true
+  }
+
+    Student.remoteMethod('transferCoins', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'data',
+        type: 'object',
+        http: {source: 'body'},
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'Transfers coins from one student to other',
+    http: {path: '/:id/transferCoins', verb: 'put'},
+  });
 };
