@@ -225,7 +225,7 @@ module.exports = function(Correction) {
     stuCorr.save();
     stuAct.save();
     console.log(stuChanges);
-    stu.updateAttributes(stuChanges);
+    stu.updateAttributes({...stuChanges, availableUntil: 0});
     const msg = {
       to: stu.email,
       from: {
@@ -245,6 +245,10 @@ module.exports = function(Correction) {
       }.zip
       </p>`,
     };
+    stuCorr.updateAttributes({
+      correctionPoints: stuCorr.correctionPoints + 1,
+      availableUntil: 0,
+    });
     Notification.create({
       studentId: corr.studentActivity.studentId,
       createdAt: moment().toDate(),
