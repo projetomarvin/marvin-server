@@ -68,28 +68,15 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "checkRepository"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "ALLOW",
-      "property": "__destroyById__notifications"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "ALLOW",
-      "property": "pushToGit"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "ALLOW",
-      "property": "linkGithub"
+      "property": [
+        "checkRepository",
+        "__create__levelLogs",
+        "__destroyById__notifications",
+        "linkGithub",
+        "pushToGit",
+        "transferCoins",
+        "buyCPoint"
+      ]
     },
     {
       "accessType": "EXECUTE",
@@ -104,13 +91,6 @@
       "principalId": "facilitator",
       "permission": "ALLOW",
       "property": "patchAttributes"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "$owner",
-      "permission": "ALLOW",
-      "property": "__create__levelLogs"
     }
   ],
   "methods": {}
