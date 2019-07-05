@@ -196,10 +196,7 @@ module.exports = function(Correction) {
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
       stuChanges.activityNumber = stu.activityNumber + 1;
-      if (stuAct.fails)
-        stuChanges.XPPoints =
-          stu.XPPoints + (data.grade * 100) / (stuAct.fails + 1);
-      else stuChanges.XPPoints = stu.XPPoints + 100 * data.grade;
+      stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
       StudentActivity.create({
         studentId: stu.id,
         activityId: course.course.activities[stuChanges.activityNumber].id,
@@ -221,7 +218,7 @@ module.exports = function(Correction) {
         precision += 1 / data.correctorAcuracy.length;
       }
     }
-    stuCorr.XPPoints += 20 * precision;
+
     stuCorr.save();
     stuAct.save();
     console.log(stuChanges);
@@ -380,10 +377,7 @@ module.exports = function(Correction) {
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
       stuChanges.activityNumber = stu.activityNumber + 1;
-      if (stuAct.fails)
-        stuChanges.XPPoints =
-          stu.XPPoints + (data.grade * 100) / (stuAct.fails + 1);
-      else stuChanges.XPPoints = stu.XPPoints + 100 * data.grade;
+      stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
       StudentActivity.create({
         studentId: stu.id,
         activityId: course.course.activities[stuChanges.activityNumber].id,

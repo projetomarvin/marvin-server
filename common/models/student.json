@@ -16,10 +16,10 @@
       "required": true,
       "default": 3
     },
-    "XPPoints": {
+    "coins": {
       "type": "number",
       "required": true,
-      "default": 0
+      "default": 42
     },
     "githubAccessToken": {
       "type": "string"
