@@ -149,6 +149,7 @@ module.exports = function(Studentactivity) {
     const stu = await Students.findById(stActivity.studentId);
     const Act = await Activity.findById(stActivity.activityId);
     const corrector = await Students.findById(userId);
+    const codes = {};
     if (!stActivity.corrector2Id) {
       let folder;
       let path = Act.exercises[0].file.split('/');
@@ -188,16 +189,17 @@ module.exports = function(Studentactivity) {
           });
           await Promise.all(
             currentFiles.map(async f => {
-              const file = await axios(
+              const fileG = await axios(
                 `https://api.github.com/repos/${stu.username}/marvin/contents` +
                   f.path +
                   '?access_token=' + process.env.GITHUB_TOKEN
               );
               await fs.writeFileSync(
                 `${folder}/${id}/${f.path}`,
-                file.data.content,
+                fileG.data.content,
                 'base64'
               );
+              codes[file.substring(0, file.length - 3)] = fileG.data.content;
               console.log('file created');
             })
           );
@@ -235,6 +237,7 @@ module.exports = function(Studentactivity) {
       correctorId: userId,
       studentId: stActivity.studentId,
       createdAt: moment().toDate(),
+      codes,
     });
     console.log(corr);
     const corrData = {
