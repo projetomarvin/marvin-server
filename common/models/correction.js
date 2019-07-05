@@ -240,9 +240,7 @@ module.exports = function(Correction) {
       Sua nota final foi ${Math.floor(data.grade * 100)}%.
       ${finalMsg}
       <br>
-      Acesse o código que foi avaliado em https://s3-sa-east-1.amazonaws.com/marvin-files/${
-        stuAct.id
-      }.zip
+      Acesse o código que foi avaliado em https://s3-sa-east-1.amazonaws.com/marvin-files/${stuAct.id}.zip
       </p>`,
     };
     stuCorr.updateAttributes({
