@@ -35,45 +35,45 @@ module.exports = function(Correction) {
       where: {targetURL: `/correcao.html?${data.id}`},
     });
     prevMsg.destroy();
-    Notification.create({
-      studentId: stuAct.studentId,
-      createdAt: moment().toDate(),
-      message: 'Sua correção terminou, clique para dar o feedback.',
-      targetURL: `/feedback.html?${data.id}`,
-    });
+    // Notification.create({
+    //   studentId: stuAct.studentId,
+    //   createdAt: moment().toDate(),
+    //   message: 'Sua correção terminou, clique para dar o feedback.',
+    //   targetURL: `/feedback.html?${data.id}`,
+    // });
   });
 
-  Correction.afterRemote('prototype.__create__feedbacks', async function(
-    ctx,
-    data
-  ) {
-    const StudentActivity = Correction.app.models.StudentActivity;
-    const Activity = Correction.app.models.Activity;
-    const Notification = Correction.app.models.Notification;
-    const Student = Correction.app.models.Student;
-    const corr = await Correction.findById(data.correctionId);
-    const stAct = await StudentActivity.findById(corr.studentActivityId);
-    const Act = await Activity.findById(stAct.activityId);
-    const stCorr = await Student.findById(corr.correctorId);
-    const stu = await Student.findById(stAct.studentId);
-    const prevMsg = await Notification.findOne({
-      where: {targetURL: `/feedback.html?${corr.id}`},
-    });
-    if (!Act.exercises[0].tests && !stAct.corrector2Id && stAct.correctorId) {
-      stAct.updateAttributes({corrector2Id: 0});
-      stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1});
-    }
-    stCorr.correctionPoints++;
-    stCorr.availableUntil = 0;
-    stCorr.updateAttributes({
-      correctionPoints: stCorr.correctionPoints + 1,
-      availableUntil: 0,
-    });
-    stu.updateAttributes({availableUntil: 0});
-    if (prevMsg) {
-      prevMsg.destroy();
-    }
-  });
+  // Correction.afterRemote('prototype.__create__feedbacks', async function(
+  //   ctx,
+  //   data
+  // ) {
+  //   const StudentActivity = Correction.app.models.StudentActivity;
+  //   const Activity = Correction.app.models.Activity;
+  //   const Notification = Correction.app.models.Notification;
+  //   const Student = Correction.app.models.Student;
+  //   const corr = await Correction.findById(data.correctionId);
+  //   const stAct = await StudentActivity.findById(corr.studentActivityId);
+  //   const Act = await Activity.findById(stAct.activityId);
+  //   const stCorr = await Student.findById(corr.correctorId);
+  //   const stu = await Student.findById(stAct.studentId);
+  //   const prevMsg = await Notification.findOne({
+  //     where: {targetURL: `/feedback.html?${corr.id}`},
+  //   });
+  //   if (!Act.exercises[0].tests && !stAct.corrector2Id && stAct.correctorId) {
+  //     stAct.updateAttributes({corrector2Id: 0});
+  //     stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1});
+  //   }
+  //   stCorr.correctionPoints++;
+  //   stCorr.availableUntil = 0;
+  //   stCorr.updateAttributes({
+  //     correctionPoints: stCorr.correctionPoints + 1,
+  //     availableUntil: 0,
+  //   });
+  //   stu.updateAttributes({availableUntil: 0});
+  //   if (prevMsg) {
+  //     prevMsg.destroy();
+  //   }
+  // });
 
   Correction.finishCorrection = async function(id) {
     const Activity = Correction.app.models.Activity;
