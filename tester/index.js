@@ -40,12 +40,7 @@ module.exports = {
             };
             if (typeof test !== 'object') {
               answer.correct = false;
-              answer.test = 'testando parametro(s) ' +
-              JSON.stringify(t.param) +
-              '\nO resultado esperado era ' +
-              JSON.stringify(t.result) +
-              ' e o obtido foi ' +
-              test;
+              answer.test = test;
               return answer;
             } else if (t.function) {
               let test2, test3;
