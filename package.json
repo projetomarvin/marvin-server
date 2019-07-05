@@ -30,7 +30,7 @@
     "vm2": "^3.6.4"
   },
   "devDependencies": {
-    "eslint": "^3.17.1",
+    "eslint": "^3.19.0",
     "eslint-config-loopback": "^8.0.0"
   },
   "repository": {
