@@ -10,8 +10,16 @@
       "type": "number",
       "required": true
     },
-    "timestamp": {
-      "type": "date",
+    "hour": {
+      "type": "string",
+      "required": true
+    },
+    "date": {
+      "type": "string",
+      "required": true
+    },
+    "student": {
+      "type": "string",
       "required": true
     }
   },
