@@ -164,6 +164,10 @@ module.exports = function(Studentactivity) {
       await Promise.all(
         Act.exercises.map(async r => {
           let path2 = r.file.split('/');
+          let file = r.file;
+          if (stActivity.language) {
+            file = file.substring(0, file.length - 2) + stActivity.language;
+          }
           path2.splice(-1, 1);
           path2 = path2.join('/');
           await execSync(`mkdir ${folder}/${id}/${path2}`);
@@ -180,7 +184,7 @@ module.exports = function(Studentactivity) {
               '1&access_token=' + process.env.GITHUB_TOKEN
           );
           const currentFiles = files.data.tree.filter(obj => {
-            return obj.mode === '100644' && obj.path === r.file;
+            return obj.mode === '100644' && obj.path === file;
           });
           await Promise.all(
             currentFiles.map(async f => {

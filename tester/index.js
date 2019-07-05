@@ -15,7 +15,7 @@ module.exports = {
             let test;
             if (!t.output) t.output = '';
             if (python) {
-              test = await pyCheck(e.file, t.param, id); // for PY
+              test = await pyCheck(e.file.substring(0, e.file.length - 2) + 'py', t.param, id);
             } else {
               test = await check(e.file, t.param, id); // for JS
             }
