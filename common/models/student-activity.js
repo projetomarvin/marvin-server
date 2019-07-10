@@ -90,7 +90,6 @@ module.exports = function(Studentactivity) {
       return (
         id !== String(sts.studentId) &&
         !corrs.includes(id) &&
-        !item.pendingCorrection &&
         new Date(item.availableUntil) > new Date()
       );
     });
@@ -228,7 +227,8 @@ module.exports = function(Studentactivity) {
     if (!stActivity.correctorId) stActivity.correctorId = userId;
     else stActivity.corrector2Id = userId;
     stActivity.finishedAt = moment().toDate();
-    stu.correctionPoints--;
+    stu.correctionPoints--;''
+    stu.availableUntil = 'correction'
     stu.save();
     stActivity.save();
     const corr = await correction.create({
@@ -243,7 +243,7 @@ module.exports = function(Studentactivity) {
       level: stu.activityNumber,
       correctionId: corr.id,
     };
-    corrector.updateAttributes({pendingCorrection: corrData});
+    corrector.updateAttributes({availableUntil: 'correction'});
     return {
       filesURL: `https://s3-sa-east-1.amazonaws.com/marvin-files/${id}.zip`,
       corrector: corrector,
@@ -289,12 +289,10 @@ module.exports = function(Studentactivity) {
     const corr = await Correction.findById(id);
     const stuCorr = await Student.findById(req.accessToken.userId);
     if (!corr) {
-      await stuCorr.updateAttributes({pendingCorrection: null});
       throw 'A outra pessoa cancelou a correção!';
     }
     const curAct = await Studentactivity.findById(corr.studentActivityId); //Dando pau aqui quando cancela correcao
     const stu = await Student.findById(curAct.studentId);
-    await stuCorr.updateAttributes({pendingCorrection: null});
     if (data.answer === 'false') {
       const not = await Notification.findOne({
         where: {targetURL: `/correcao.html?${id}`},
@@ -312,10 +310,10 @@ module.exports = function(Studentactivity) {
       curAct.updateAttributes(newCurAct, (e, d) => console.log(e, d));
       await Correction.destroyById(id);
       await Notification.destroyById(not.id);
-    } else {
-      await stu.updateAttributes({availableUntil: 'correction'});
-      await stuCorr.updateAttributes({availableUntil: 'correction'});
+      await stu.updateAttributes({availableUntil: 0});
+      await stuCorr.updateAttributes({availableUntil: 0});
     }
+    return data;
   };
 
   Studentactivity.remoteMethod('answerCorrectionInvite', {
@@ -359,10 +357,11 @@ module.exports = function(Studentactivity) {
       err.statusCode = 403;
       err.message = 'correction already started';
       throw err;
-    } else {
-      const stu = await Student.findById(lastCorr.correctorId);
-      stu.updateAttributes({pendingCorrection: 0});
     }
+    const stu = await Student.findById(curAct.studentId);
+    const stuCorr = await Student.findById(lastCorr.correctorId);
+    stuCorr.updateAttributes({availableUntil: 0});
+    stu.updateAttributes({availableUntil: 0});
     Correction.destroyById(lastCorr.id, e => console.log(e));
     Notification.destroyById(not.id, e => console.log(e));
     let newCurAct = {};
