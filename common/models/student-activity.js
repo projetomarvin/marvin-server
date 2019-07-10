@@ -284,15 +284,18 @@ module.exports = function(Studentactivity) {
     },
   });
 
-  Studentactivity.answerCorrectionInvite = async function(id, data) {
-    console.log(data);
+  Studentactivity.answerCorrectionInvite = async function(req, id, data) {
     const Correction = Studentactivity.app.models.Correction;
     const Notification = Studentactivity.app.models.Notification;
     const Student = Studentactivity.app.models.Student;
     const corr = await Correction.findById(id);
-    const curAct = await Studentactivity.findById(corr.studentActivityId);
+    const stuCorr = await Student.findById(req.accessToken.userId);
+    if (!corr) {
+      await stuCorr.updateAttributes({pendingCorrection: null});
+      throw 'A outra pessoa cancelou a correção!';
+    }
+    const curAct = await Studentactivity.findById(corr.studentActivityId); //Dando pau aqui quando cancela correcao
     const stu = await Student.findById(curAct.studentId);
-    const stuCorr = await Student.findById(corr.correctorId);
     await stuCorr.updateAttributes({pendingCorrection: null});
     if (data.answer === 'false') {
       const not = await Notification.findOne({
@@ -311,11 +314,17 @@ module.exports = function(Studentactivity) {
       curAct.updateAttributes(newCurAct, (e, d) => console.log(e, d));
       await Correction.destroyById(id);
       await Notification.destroyById(not.id);
+    } else {
+      await stu.updateAttributes({availableUntil: 'correction'});
+      await stuCorr.updateAttributes({availableUntil: 'correction'});
     }
-  }
+  };
 
   Studentactivity.remoteMethod('answerCorrectionInvite', {
     accepts: [
+      {
+        arg: 'req', type: 'object', http: { source: 'req' }
+      },
       {
         arg: 'id', type: 'string', required: true,
       }, {
