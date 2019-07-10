@@ -271,7 +271,7 @@ module.exports = function(Student) {
     else if (!stuTo)
       throw "Destinatário inválido!"
     stuFrom.updateAttributes({coins: stuFrom.coins - data.value});
-    stuTo.updateAttributes({coins: stuTo.coins + data.value});
+    stuTo.updateAttributes({coins: stuTo.coins + Number(data.value)});
     return true
   }
 
