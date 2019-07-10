@@ -92,6 +92,7 @@ module.exports = function(Studentactivity) {
       return (
         id !== String(sts.studentId) &&
         !corrs.includes(id) &&
+        !item.pendingCorrection &&
         new Date(item.availableUntil) > new Date()
       );
     });
