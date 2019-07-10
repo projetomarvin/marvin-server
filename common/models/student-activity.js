@@ -335,6 +335,7 @@ module.exports = function(Studentactivity) {
   Studentactivity.cancelCorrection = async function(id) {
     const Correction = Studentactivity.app.models.Correction;
     const Notification = Studentactivity.app.models.Notification;
+    const Student = Studentactivity.app.models.Student;
     const curAct = await Studentactivity.findById(id, {include: 'corrections'});
     let act = JSON.stringify(curAct);
     act = JSON.parse(act);
@@ -351,6 +352,9 @@ module.exports = function(Studentactivity) {
       err.statusCode = 403;
       err.message = 'correction already started';
       throw err;
+    } else {
+      const stu = await Student.findById(lastCorr.correctorId);
+      stu.updateAttributes({pendingCorrection: 0});
     }
     Correction.destroyById(lastCorr.id, e => console.log(e));
     Notification.destroyById(not.id, e => console.log(e));
