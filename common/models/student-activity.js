@@ -95,8 +95,8 @@ module.exports = function(Studentactivity) {
     });
     let sum = 0;
     students.map(st => {
-      let cpoints = 5 - st.correctionPoints;
-      cpoints = cpoints < 1 ? 0.5 : cpoints ** 2;
+      let cpoints = 4 - st.correctionPoints;
+      cpoints = cpoints < 1 ? 0.5 : cpoints ** 3;
       let lvl = 3 - Math.abs(currStudent.activityNumber - st.activityNumber);
       lvl = lvl < 1 ? 0.5 : lvl ** 2;
       list.push({[st.id]: cpoints + lvl});
