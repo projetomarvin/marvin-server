@@ -32,13 +32,11 @@ module.exports = function(Studentactivity) {
               r.file +
               '?access_token=' + process.env.GITHUB_TOKEN
           );
-          console.log(file.data.path);
           return file.data;
         })
       );
       return data;
     } catch (e) {
-      console.log(e);
       const file = e.response.request.path.split('?')[0].split('/');
       const err = new Error();
       err.statusCode = 404;
@@ -240,7 +238,6 @@ module.exports = function(Studentactivity) {
       createdAt: moment().toDate(),
       codes,
     });
-    console.log(corr);
     const corrData = {
       studentName: stu.username,
       level: stu.activityNumber,
