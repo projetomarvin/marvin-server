@@ -223,23 +223,6 @@ module.exports = function(Correction) {
     stuAct.save();
     console.log(stuChanges);
     stu.updateAttributes({...stuChanges, availableUntil: 0});
-    const msg = {
-      to: stu.email,
-      from: {
-        email: 'contato@projetomarvin.com',
-        name: 'Marvin',
-      },
-      subject: 'Seu resultado!!',
-      html: `<p>
-      Resultado da correção automática:
-      <br>
-      ${corrMsg}
-      Sua nota final foi ${Math.floor(data.grade * 100)}%.
-      ${finalMsg}
-      <br>
-      Acesse o código que foi avaliado em https://s3-sa-east-1.amazonaws.com/marvin-files/${stuAct.id}.zip
-      </p>`,
-    };
     stuCorr.updateAttributes({
       correctionPoints: stuCorr.correctionPoints + 1,
       availableUntil: 0,
@@ -249,10 +232,9 @@ module.exports = function(Correction) {
       createdAt: moment().toDate(),
       message: `Sua correção terminou e a
        nota final foi ${Math.floor(data.grade * 100)}%.
-       Veja seu e-mail para mais detalhes`,
+       Clique para mais detalhes`,
       targetURL: '/detalheNota.html?' + corr.id,
     });
-    sgMail.send(msg);
   });
 
   Correction.remoteMethod('finishCorrection', {
