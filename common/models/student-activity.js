@@ -316,6 +316,7 @@ module.exports = function(Studentactivity) {
       await Notification.destroyById(not.id);
       await stu.updateAttributes({availableUntil: 0});
       await stuCorr.updateAttributes({availableUntil: 0});
+      console.log(stuCorr.username + ' REJEITOU A CORREÇÃO');
     }
     return data;
   };
@@ -355,7 +356,6 @@ module.exports = function(Studentactivity) {
     const not = await Notification.findOne({
       where: {targetURL: `/correcao.html?${lastCorr.id}`},
     });
-    console.log(not, lastCorr);
     if (lastCorr.started) {
       const err = new Error();
       err.statusCode = 403;
@@ -376,7 +376,7 @@ module.exports = function(Studentactivity) {
     else
       newCurAct.prevCorrectors =  [...curAct.prevCorrectors, lastCorr.correctorId];
     newCurAct.finishedAt = 0;
-    console.log(newCurAct);
+    console.log(stu.username + ' CANCELOU A CORREÇÃO');
     curAct.updateAttributes(newCurAct, (e, d) => console.log(e, d));
   };
 
