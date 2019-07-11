@@ -218,14 +218,19 @@ module.exports = function(Correction) {
         precision += 1 / data.correctorAcuracy.length;
       }
     }
-
+    let precisionCoins = 0;
+    if (precision === 1) {
+      precisionCoins = 30
+    }
     stuCorr.save();
     stuAct.save();
     console.log(stuChanges);
+    console.log(precision);
     stu.updateAttributes({...stuChanges, availableUntil: 0});
     stuCorr.updateAttributes({
       correctionPoints: stuCorr.correctionPoints + 1,
       availableUntil: 0,
+      coins: stuCorr.coins + precisionCoins,
     });
     Notification.create({
       studentId: corr.studentActivity.studentId,
