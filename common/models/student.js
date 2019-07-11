@@ -239,11 +239,11 @@ module.exports = function(Student) {
   Student.buyCPoint = async function(id) {
     const stu =  await Student.findById(id);
     const changes = {};
-    if (stu.coins < 80) {
+    if (stu.coins < 104) {
       throw "Moedas insuficientes!"
     }
     changes.correctionPoints = stu.correctionPoints + 1;
-    changes.coins = stu.coins - 80;
+    changes.coins = stu.coins - 104;
     stu.updateAttributes(changes);
     return true
   }
