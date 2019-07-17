@@ -114,12 +114,19 @@ module.exports = function(Student) {
   });
 
   Student.beforeRemote('prototype.patchAttributes', async function(ctx, data) {
+    const uId = ctx.req.accessToken.userId.toJSON();
+    const st = await Student.findById(uId);
+    console.log(ctx.req.body);
      if (ctx.req.body.availableUntil && ctx.req.body.availableUntil !== "available") {
-      const uId = ctx.req.accessToken.userId.toJSON();
-      const st = await Student.findById(uId);
       if (st.availableUntil === "correction") {
-        throw "Você está em uma correção"
+        throw "Você está em uma correção";
       }
+    } else if (ctx.req.body.panic === 'true') {
+      console.log('coinnnnnnnn');
+      if (st.coins < 420) {
+        throw "Você não tem moedas insuficientes";
+      }
+      ctx.req.body.coins = st.coins - 420;
     } else {
       return;
     }
