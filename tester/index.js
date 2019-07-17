@@ -45,8 +45,8 @@ module.exports = {
             } else if (t.function) {
               let test2, test3;
               if (python) {
-                test2 = await pyCheck(e.file, t.param, id);
-                test3 = await pyCheck(e.file, t.param, id);
+                test2 = await pyCheck(e.file.substring(0, e.file.length - 2) + 'py', t.param, id);
+                test3 = await pyCheck(e.file.substring(0, e.file.length - 2) + 'py', t.param, id);
               } else {
                 test2 = await check(e.file, t.param, id);
                 test3 = await check(e.file, t.param, id);
