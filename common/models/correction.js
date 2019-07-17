@@ -219,7 +219,7 @@ module.exports = function(Correction) {
       }
     }
     let precisionCoins = 0;
-    if (precision === 1) {
+    if (precision > 0.999) {
       precisionCoins = 30
     }
     stuCorr.save();
