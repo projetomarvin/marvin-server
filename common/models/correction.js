@@ -34,7 +34,9 @@ module.exports = function(Correction) {
     const prevMsg = await Notification.findOne({
       where: {targetURL: `/correcao.html?${data.id}`},
     });
-    prevMsg.destroy();
+    if (prevMsg) {
+      prevMsg.destroy();
+    }
     // Notification.create({
     //   studentId: stuAct.studentId,
     //   createdAt: moment().toDate(),
