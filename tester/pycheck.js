@@ -44,10 +44,9 @@ module.exports = async function(level, param, id) {
   // const functionFile = file.match(/(fun.*{[\s\S]*}[\s]*$)/g);
   // if (!functionFile) return 'Função inválida!';
   // if (usesFor(functionFile[0])) return 'Uso de laço for identificado';
-  const functionIvk = levelName + '(' + params + ')';
-  functionIvk.replace('true', 'True');
-  functionIvk.replace('false', 'False');
-  console.log(functionIvk);
+  let  functionIvk = levelName + '(' + String(params) + ')';
+  functionIvk = functionIvk.replace(/true/g, 'True').replace(/false/g, 'False');
+  console.log(file, functionIvk);
   const res = await axios.post('https://demoapi.projetomarvin.com/api/pythonCode/evaluate', {
     code: file,
     function: functionIvk,
