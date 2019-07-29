@@ -396,6 +396,7 @@ module.exports = function(Correction) {
       stuAct.fails++;
     }
     stuCorr.correctionPoints++;
+    stuCorr.availableUntil = 0;
     stuCorr.save();
     stuAct.save();
     stu.updateAttributes(stuChanges);
