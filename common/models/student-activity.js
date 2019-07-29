@@ -90,7 +90,8 @@ module.exports = function(Studentactivity) {
       return (
         id !== String(sts.studentId) &&
         !corrs.includes(id) &&
-        new Date(item.availableUntil) > new Date()
+        new Date(item.availableUntil) > new Date() &&
+        sts.correctorId !== id
       );
     });
     let sum = 0;
