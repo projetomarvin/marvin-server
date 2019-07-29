@@ -29,11 +29,20 @@ module.exports = function(Correction) {
     data
   ) {
     const StudentActivity = Correction.app.models.StudentActivity;
+    const Student = Correction.app.models.Student;
+    const Activity = Correction.app.models.Activity;
     const Notification = Correction.app.models.Notification;
     const stuAct = await StudentActivity.findById(data.studentActivityId);
+    const corr = await Correction.findById(data.id);
+    const act = await Activity.findById(stuAct.activityId);
+    const stCorr = await Student.findById(corr.correctorId);
     const prevMsg = await Notification.findOne({
       where: {targetURL: `/correcao.html?${data.id}`},
     });
+    if (!act.exercises[0].tests && !stuAct.corrector2Id && stuAct.correctorId) {
+      stuAct.updateAttributes({corrector2Id: 0});
+      stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1, availableUntil: 0});
+    }
     if (prevMsg) {
       prevMsg.destroy();
     }
@@ -360,6 +369,7 @@ module.exports = function(Correction) {
       else stuAct.prevCorrectors = [stuAct.correctorId, stuAct.corrector2Id];
       stuAct.correctorId = undefined;
       stuAct.corrector2Id = undefined;
+      stuAct.prevCorrectors [corr.correctorId, corr.corrector2Id];
       stuAct.fails++;
     } else if (
       data.grade >= course.course.activities[stu.activityNumber].minGrade
@@ -368,7 +378,7 @@ module.exports = function(Correction) {
         'Parabéns, você passou de fase! Acesse a plataforma ' +
         'para ver os próximos desafios.';
       stuChanges.activityNumber = stu.activityNumber + 1;
-      stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
+      stuChanges.coins = stu.coins + (80 - 8 * stuAct.fails);
       StudentActivity.create({
         studentId: stu.id,
         activityId: course.course.activities[stuChanges.activityNumber].id,
@@ -382,6 +392,7 @@ module.exports = function(Correction) {
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
       stuAct.corrector2Id = undefined;
+      stuAct.prevCorrectors [corr.correctorId, corr.corrector2Id];
       stuAct.fails++;
     }
     stuCorr.correctionPoints++;
