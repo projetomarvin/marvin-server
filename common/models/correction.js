@@ -356,7 +356,7 @@ module.exports = function(Correction) {
     const stuAct = await StudentActivity.findById(corr.id);
     const course = stu.toJSON();
     let finalMsg;
-    let stuChanges = {};
+    let stuChanges = {availableUntil: 0};
     if (data.cheat) {
       finalMsg =
         '<b>A pessoa que te corrigiu indicou que você burlou as regras' +
