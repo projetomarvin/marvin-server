@@ -384,6 +384,7 @@ module.exports = function(Correction) {
         activityId: course.course.activities[stuChanges.activityNumber].id,
         createdAt: moment().toDate(),
         fails: 0,
+        language: 'html'
       });
     } else {
       finalMsg =
