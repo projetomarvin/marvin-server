@@ -208,7 +208,7 @@ module.exports = function(Correction) {
         'para ver os próximos desafios.';
       stuChanges.activityNumber = stu.activityNumber + 1;
       stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
-      const language = stu.activityNumber > 6 ? 'html' : 0;
+      const language = stu.activityNumber > 7 ? 'html' : undefined;
       StudentActivity.create({
         studentId: stu.id,
         activityId: course.course.activities[stuChanges.activityNumber].id,
