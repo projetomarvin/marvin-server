@@ -243,29 +243,100 @@ module.exports = function(Student) {
     http: {path: '/:id/username', verb: 'get'},
   });
 
-  Student.buyCPoint = async function(id) {
-    const stu =  await Student.findById(id);
-    const changes = {};
-    if (stu.coins < 104) {
-      throw "Moedas insuficientes!"
-    }
-    changes.correctionPoints = stu.correctionPoints + 1;
-    changes.coins = stu.coins - 104;
-    stu.updateAttributes(changes);
-    return true
+  function sendMail(username, product) {
+    sgMail.setApiKey(sgKey);
+    const msg = {
+      to: 'dnolascodante@gmail.com',
+      from: 'contato@projetomarvin.com',
+      subject: 'Compra na loja',
+      text: `${username} comprou um ${product}`,
+    };
+    sgMail.send(msg);
   }
 
-    Student.remoteMethod('buyCPoint', {
+  Student.buy = async function(id, product) {
+    const stu = await Student.findById(id);
+    const changes = {};
+    let formId = '';
+    switch (product) {
+      case 'CPoints':
+        if (stu.coins < 104) {
+          throw 'Moedas insuficientes!';
+        }
+        changes.correctionPoints = stu.correctionPoints + 1;
+        changes.coins = stu.coins - 104;
+
+        break;
+      case 'stickerMarvin':
+        if (stu.coins < 42) {
+          throw 'Moedas insuficientes!';
+        }
+        changes.coins = stu.coins - 42;
+        sendMail(stu.username, 'adesivo MARVIN');
+        break;
+      case 'stickerDontPanic':
+        if (stu.coins < 42) {
+          throw 'Moedas insuficientes!';
+        }
+        changes.coins = stu.coins - 42;
+        sendMail(stu.username, "adesivo DON'T PANIC");
+        break;
+      case 'tshirt':
+        if (stu.coins < 997) {
+          throw 'Moedas insuficientes!';
+        }
+        changes.coins = stu.coins - 997;
+        sendMail(stu.username, 'camisa');
+        break;
+      case 'dado':
+        if (stu.coins < 47) {
+          throw 'Moedas insuficientes!';
+        }
+        changes.coins = stu.coins - 477;
+        sendMail(stu.username, 'dado');
+        break;
+      case 'music3':
+        if (stu.coins < 42) {
+          throw 'Moedas insuficientes!';
+        }
+        formId = '1FAIpQLSfU2b7tdoZ8ysUNXeg4Bm4PfwkpP3XAGZHaYX4DI3OI8hIiew';
+        changes.coins = stu.coins - 42;
+        break;
+      case 'music2':
+        if (stu.coins < 35) {
+          throw 'Moedas insuficientes!';
+        }
+        formId = '1FAIpQLSdaRnwyX437d-iIF4-d4zqh6JFaCgJQboCQWyzVEDGnATSeKg';
+        changes.coins = stu.coins - 35;
+        break;
+      case 'music1':
+        if (stu.coins < 21) {
+          throw 'Moedas insuficientes!';
+        }
+        formId = '1FAIpQLSddMF2LWD0uoCZLtkQg0v8ca4xigl7HRICac_NecgDgWI-NqA';
+        changes.coins = stu.coins - 21;
+        break;
+    }
+    stu.updateAttributes(changes);
+    return formId;
+  };
+
+  Student.remoteMethod('buy', {
     accepts: [
       {
         arg: 'id',
         type: 'string',
         required: true,
       },
+      {
+        arg: 'product',
+        type: 'string',
+        required: true,
+      },
     ],
     returns: {root: true},
-    description: 'Buys one correction point with coins',
-    http: {path: '/:id/buyCPoint', verb: 'put'},
+    description: 'Buys products with coins',
+    http: {path: '/:id/buy/:product', verb: 'post'},
   });
 
   Student.transferCoins = async function(id, data) {
