@@ -77,15 +77,15 @@ module.exports = function(Student) {
     const student = await Student.findById(id);
     return axios
       .post('https://github.com/login/oauth/access_token', {
-        client_id: "71f8116e373c16f3eb11",
-        client_secret: "963642187139722787a001456c34002985a9f22c",
+        client_id: '71f8116e373c16f3eb11',
+        client_secret: '963642187139722787a001456c34002985a9f22c',
         code: token,
       })
       .then(r => {
         const authToken = r.data.split('=')[1].split('&')[0];
         console.log(authToken);
         if (authToken !== 'bad_verification_code') {
-          student.updateAttributes({githubAccessToken: authToken})
+          student.updateAttributes({githubAccessToken: authToken});
           return authToken;
         } else {
           const err = new Error();
@@ -93,7 +93,7 @@ module.exports = function(Student) {
           return err;
         }
       });
-  }
+  };
 
   Student.remoteMethod('linkGithub', {
     accepts: [
@@ -117,14 +117,17 @@ module.exports = function(Student) {
     const uId = ctx.req.accessToken.userId.toJSON();
     const st = await Student.findById(uId);
     console.log(ctx.req.body);
-     if (ctx.req.body.availableUntil && ctx.req.body.availableUntil !== "available") {
-      if (st.availableUntil === "correction") {
-        throw "Você está em uma correção";
+    if (
+      ctx.req.body.availableUntil &&
+      ctx.req.body.availableUntil !== 'available'
+    ) {
+      if (st.availableUntil === 'correction') {
+        throw 'Você está em uma correção';
       }
     } else if (ctx.req.body.panic === 'true') {
       console.log('coinnnnnnnn');
       if (st.coins < 420) {
-        throw "Você não tem moedas insuficientes";
+        throw 'Você não tem moedas insuficientes';
       }
       ctx.req.body.coins = st.coins - 420;
     } else {
@@ -135,9 +138,7 @@ module.exports = function(Student) {
   function gitPush(usr, data, sha) {
     axios
       .put(
-        `https://api.github.com/repos/${usr.username}/marvin/contents/${
-          data.path
-        }`,
+        `https://api.github.com/repos/${usr.username}/marvin/contents/${data.path}`,
         {
           content: data.content,
           message: data.message,
@@ -159,14 +160,13 @@ module.exports = function(Student) {
     LevelLog.create({
       student: usr.username,
       hour: `${new Date().getHours()}:${new Date().getMinutes()}`,
-      date: `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
+      date: `${new Date().getDate()}/${new Date().getMonth() +
+        1}/${new Date().getFullYear()}`,
       level: usr.activityNumber,
       file: data.path,
     });
     return axios(
-      `https://api.github.com/repos/${usr.username}/marvin/contents/${
-        data.path
-      }`,
+      `https://api.github.com/repos/${usr.username}/marvin/contents/${data.path}`,
       {
         headers: {
           Authorization: 'token ' + usr.githubAccessToken,
@@ -174,7 +174,7 @@ module.exports = function(Student) {
       }
     )
       .then(r => {
-        gitPush(usr, data, r.data.sha)
+        gitPush(usr, data, r.data.sha);
       })
       .catch(err => {
         if (err.response.status === 404) gitPush(usr, data);
@@ -219,8 +219,8 @@ module.exports = function(Student) {
     sgMail.send(msg);
   });
 
-  Student.getUsername = async function (id) {
-    const stu =  await Student.findById(id);
+  Student.getUsername = async function(id) {
+    const stu = await Student.findById(id);
     if (stu) {
       return stu.username;
     } else {
@@ -228,7 +228,7 @@ module.exports = function(Student) {
       err.status = 500;
       throw err;
     }
-  }
+  };
 
   Student.remoteMethod('getUsername', {
     accepts: [
@@ -269,20 +269,17 @@ module.exports = function(Student) {
   });
 
   Student.transferCoins = async function(id, data) {
-    const stuFrom =  await Student.findById(id);
-    const stuTo =  await Student.findOne({where: {username: data.to}});
-    if (stuFrom.coins < data.value)
-      throw "Moedas insuficientes!"
-    else if (data.value < 1 || data.value % 1 !== 0)
-      throw "Valor inválido!"
-    else if (!stuTo)
-      throw "Destinatário inválido!"
+    const stuFrom = await Student.findById(id);
+    const stuTo = await Student.findOne({where: {username: data.to}});
+    if (stuFrom.coins < data.value) throw 'Moedas insuficientes!';
+    else if (data.value < 1 || data.value % 1 !== 0) throw 'Valor inválido!';
+    else if (!stuTo) throw 'Destinatário inválido!';
     stuFrom.updateAttributes({coins: stuFrom.coins - data.value});
     stuTo.updateAttributes({coins: stuTo.coins + Number(data.value)});
-    return true
-  }
+    return true;
+  };
 
-    Student.remoteMethod('transferCoins', {
+  Student.remoteMethod('transferCoins', {
     accepts: [
       {
         arg: 'id',
