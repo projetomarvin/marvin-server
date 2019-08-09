@@ -43,7 +43,7 @@ module.exports = async function(level, param, id) {
   const file = fs.readFileSync(levelPath, 'utf-8');
   // const functionFile = file.match(/(fun.*{[\s\S]*}[\s]*$)/g);
   // if (!functionFile) return 'Função inválida!';
-  // if (usesFor(functionFile[0])) return 'Uso de laço for identificado';
+  if (usesFor(file[0])) return 'Uso de laço for identificado';
   let  functionIvk = levelName + '(' + String(params) + ')';
   functionIvk = functionIvk.replace(/true/g, 'True').replace(/false/g, 'False');
   console.log(file, functionIvk);
