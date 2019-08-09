@@ -292,7 +292,7 @@ module.exports = function(Student) {
         if (stu.coins < 47) {
           throw 'Moedas insuficientes!';
         }
-        changes.coins = stu.coins - 477;
+        changes.coins = stu.coins - 47;
         sendMail(stu.username, 'dado');
         break;
       case 'music3':
