@@ -23,8 +23,8 @@
     },
     "prevCorrectors": {
       "type": [
-          "string"
-        ]
+        "string"
+      ]
     },
     "autocorrectionGrade": {
       "type": "number"

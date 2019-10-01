@@ -149,5 +149,23 @@
   "levelLog": {
     "dataSource": "mongodb",
     "public": true
+  },
+  "pdf": {
+    "dataSource": "mongodb",
+    "public": true,
+    "options": {
+      "remoting": {
+        "sharedMethods": {
+          "*": false,
+          "findById": true,
+          "create": true,
+          "prototype.patchAttributes": true
+        }
+      }
+    }
+  },
+  "exercise": {
+    "dataSource": "mongodb",
+    "public": false
   }
 }

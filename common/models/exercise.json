@@ -1,0 +1,50 @@
+{
+  "name": "exercise",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "number": {
+      "type": "number",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "path": {
+      "type": "string",
+      "required": true
+    },
+    "instructions": {
+      "type": [
+        "object"
+      ],
+      "required": true
+    },
+    "corrections": {
+      "type": [
+        "object"
+      ],
+      "required": true
+    },
+    "modifiedBy": {
+      "type": "any"
+    },
+    "modifiedAt": {
+      "type": "date"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "pdf": {
+      "type": "belongsTo",
+      "model": "pdf",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
