@@ -119,6 +119,7 @@
           "finishCorrection": true,
           "finishManual": true,
           "startCorrection": true,
+          "dryRun": true,
           "prototype.__create__feedbacks": true,
           "owned": true
         }

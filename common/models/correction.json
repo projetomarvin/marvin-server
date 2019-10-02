@@ -29,6 +29,21 @@
       "foreignKey": ""
     }
   },
-  "acls": [],
+  "acls": [
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY",
+      "property": "dryRun"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "facilitator",
+      "permission": "ALLOW",
+      "property": "dryRun"
+    }
+  ],
   "methods": {}
 }

@@ -5,6 +5,7 @@ const axios = require('axios');
 const fs = require('fs');
 const {execSync} = require('child_process');
 const check = require('../../tester/index.js');
+const dryRun = require('../../tester/singleTest.js');
 
 const sgKey = process.env.SENDGRID_API_KEY;
 sgMail.setApiKey(sgKey);
@@ -470,5 +471,23 @@ module.exports = function(Correction) {
       path: '/:id/own',
       verb: 'get',
     },
+  });
+
+  Correction.dryRun = async function (fk, {code}) {
+    const Exercise = Correction.app.models.Exercise;
+    const ex = await Exercise.findById(fk);
+    const functionName = /\/([a-z1-9]+?)\./gi.exec(ex.path)[1];
+    const result = await dryRun(code, functionName, ex.corrections);
+
+    return result;
+  }
+
+  Correction.remoteMethod('dryRun', {
+    accepts: [
+      { arg: 'fk', type: 'string', required: true },
+      { arg: 'code', type: 'object', http: { source: 'body', },  required: true, },
+    ],
+    returns: { arg: 'events', root: true },
+    http: { path: '/:fk/dryRun', verb: 'post' },
   });
 };
