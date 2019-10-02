@@ -14,22 +14,30 @@ const s3 = new AWS.S3();
 
 module.exports = function(Studentactivity) {
   Studentactivity.checkFiles = async function(id) {
-    const Activity = Studentactivity.app.models.Activity;
-    const students = Studentactivity.app.models.Student;
-    const stActivity = await Studentactivity.findById(id);
-    const stu = await students.findById(stActivity.studentId);
-    const Act = await Activity.findById(stActivity.activityId);
+    let stActivity = await Studentactivity.findById(
+      id, {
+        include: [
+          {
+            relation: 'activity',
+            scope: {
+              include: 'exercises',
+            },
+          },
+          {relation: 'student'},
+        ],
+      });
+    stActivity =  stActivity.toJSON();
     try {
       const data = await Promise.all(
-        Act.exercises.map(async r => {
-          if (r.file[r.file.length - 2] === 'j')
-            r.file = r.file.slice(0, -2) + stActivity.language;
-          else if (r.file[r.file.length - 1] === '*')
-            r.file = r.file.slice(0, -2);
-          console.log(r.file);
+        stActivity.activity.exercises.map(async r => {
+          if (r.path[r.path.length - 2] === 'j')
+            r.path = r.path.slice(0, -2) + stActivity.language;
+          else if (r.path[r.path.length - 1] === '*')
+            r.path = r.path.slice(0, -2);
+          console.log(r.path);
           const file = await axios(
-            `https://api.github.com/repos/${stu.username}/marvin/contents/` +
-              r.file +
+            `https://api.github.com/repos/${stActivity.student.username}/marvin/contents/` +
+              r.path +
               '?access_token=' + process.env.GITHUB_TOKEN
           );
           return file.data;
@@ -139,18 +147,15 @@ module.exports = function(Studentactivity) {
   });
 
   Studentactivity.finish = async function(id) {
-    const Activity = Studentactivity.app.models.Activity;
+    // const Exercise = Studentactivity.app.models.Exercise;
     const Students = Studentactivity.app.models.Student;
-    const courses = Studentactivity.app.models.Course;
     const correction = Studentactivity.app.models.Correction;
     const userId = await randomCorrector(id);
     if (!userId) {
       throw Error('Não há nenum corretor disponível');
     }
     console.log(userId);
-    const stActivity = await Studentactivity.findById(id);
-    const stu = await Students.findById(stActivity.studentId);
-    const Act = await Activity.findById(stActivity.activityId);
+    const stActivity = await Studentactivity.findById(id, {include: ['student', 'activity']});
     const corrector = await Students.findById(userId);
     const codes = {};
     if (!stActivity.corrector2Id) {
