@@ -33,6 +33,10 @@
       "type": "number",
       "required": true,
       "default": 1
+    },
+    "trail": {
+      "type": "string",
+      "default": "main"
     }
   },
   "validations": [],
@@ -45,6 +49,11 @@
     "course": {
       "type": "belongsTo",
       "model": "course",
+      "foreignKey": ""
+    },
+    "studentActivity": {
+      "type": "hasMany",
+      "model": "studentActivity",
       "foreignKey": ""
     }
   },

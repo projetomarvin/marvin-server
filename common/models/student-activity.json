@@ -40,9 +40,9 @@
       "model": "student",
       "foreignKey": ""
     },
-    "activities": {
+    "activity": {
       "type": "belongsTo",
-      "model": "activity",
+      "model": "pdf",
       "foreignKey": ""
     },
     "corrections": {
