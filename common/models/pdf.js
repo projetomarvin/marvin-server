@@ -5,7 +5,6 @@ module.exports = function(Pdf) {
   Pdf.disableRemoteMethodByName('prototype.__delete__exercises');
   Pdf.disableRemoteMethodByName('prototype.__findById__exercises');
   Pdf.disableRemoteMethodByName('prototype.__get__exercises');
-  Pdf.disableRemoteMethodByName('prototype.__updateById__exercises');
   Pdf.disableRemoteMethodByName('prototype.__destroyById__exercises');
   Pdf.disableRemoteMethodByName('prototype.__count__exercises');
 
@@ -18,6 +17,22 @@ module.exports = function(Pdf) {
   });
 
   Pdf.beforeRemote('prototype.__create__exercises', async (ctx) => {
+    console.log(ctx.req);
+    const body = ctx.req.body;
+    body.modifiedAt = moment();
+    body.modifiedBy = ctx.req.accessToken.userId;
+    return;
+  });
+
+  Pdf.beforeRemote('prototype.patchAttributes', async (ctx) => {
+    console.log(ctx.req);
+    const body = ctx.req.body;
+    body.modifiedAt = moment();
+    body.modifiedBy = ctx.req.accessToken.userId;
+    return;
+  });
+
+  Pdf.beforeRemote('prototype.__updateById__exercises', async (ctx) => {
     console.log(ctx.req);
     const body = ctx.req.body;
     body.modifiedAt = moment();
