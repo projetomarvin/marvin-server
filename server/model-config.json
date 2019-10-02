@@ -36,19 +36,6 @@
     "dataSource": "mongodb",
     "public": false
   },
-  "activity": {
-    "dataSource": "mongodb",
-    "public": true,
-    "options": {
-      "remoting": {
-        "sharedMethods": {
-          "*": false,
-          "findById": true,
-          "upload": true
-        }
-      }
-    }
-  },
   "course": {
     "dataSource": "mongodb",
     "public": true,
