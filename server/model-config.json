@@ -160,6 +160,7 @@
           "*": false,
           "findById": true,
           "create": true,
+          "deleteById": true,
           "prototype.patchAttributes": true
         }
       }
