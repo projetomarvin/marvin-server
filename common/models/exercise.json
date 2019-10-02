@@ -22,13 +22,13 @@
       "type": [
         "object"
       ],
-      "required": true
+      "required": false
     },
     "corrections": {
       "type": [
         "object"
       ],
-      "required": true
+      "required": false
     },
     "modifiedBy": {
       "type": "any"
