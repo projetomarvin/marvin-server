@@ -8,16 +8,17 @@ function arraysEqual(arr1, arr2) {
 
 module.exports = {
   runTest: async function(fase, id, python) {
+    console.log(fase);
     const run = Promise.all(
       fase.map(async function(e, i) {
         const a = Promise.all(
-          e.tests.map(async t => {
+          e.corrections.map(async t => {
             let test;
             if (!t.output) t.output = '';
             if (python) {
-              test = await pyCheck(e.file.substring(0, e.file.length - 2) + 'py', t.param, id);
+              test = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
             } else {
-              test = await check(e.file, t.param, id); // for JS
+              test = await check(e.path, t.param, id); // for JS
             }
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
@@ -45,11 +46,11 @@ module.exports = {
             } else if (t.function) {
               let test2, test3;
               if (python) {
-                test2 = await pyCheck(e.file.substring(0, e.file.length - 2) + 'py', t.param, id);
-                test3 = await pyCheck(e.file.substring(0, e.file.length - 2) + 'py', t.param, id);
+                test2 = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
+                test3 = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
               } else {
-                test2 = await check(e.file, t.param, id);
-                test3 = await check(e.file, t.param, id);
+                test2 = await check(e.path, t.param, id);
+                test3 = await check(e.path, t.param, id);
               }
               console.log('!TO RODANDO A FUNCAO', t.function, eval(t.function));
               answer.test = 'testando na função: ' + t.function;
