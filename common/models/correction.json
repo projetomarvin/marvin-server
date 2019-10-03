@@ -9,6 +9,46 @@
     "createdAt": {
       "type": "date",
       "required": true
+    },
+    "ex00": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex01": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex02": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex03": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex04": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex05": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex06": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex07": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex08": {
+      "type": "boolean",
+      "required": false
+    },
+    "ex09": {
+      "type": "boolean",
+      "required": false
     }
   },
   "validations": [],
