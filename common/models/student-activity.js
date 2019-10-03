@@ -108,7 +108,7 @@ module.exports = function(Studentactivity) {
       if (st.correctionPoints) {
         cpoints = cpoints < 1 ? 0.5 : cpoints ** 2;
       } else {
-        cpoints = 10000
+        cpoints = 10000;
       }
       let lvl = 3 - Math.abs(currStudent.activityNumber - st.activityNumber);
       lvl = lvl < 1 ? 0.5 : lvl ** 2;
@@ -147,20 +147,31 @@ module.exports = function(Studentactivity) {
   });
 
   Studentactivity.finish = async function(id) {
-    // const Exercise = Studentactivity.app.models.Exercise;
     const Students = Studentactivity.app.models.Student;
     const correction = Studentactivity.app.models.Correction;
     const userId = await randomCorrector(id);
     if (!userId) {
       throw Error('Não há nenum corretor disponível');
     }
-    console.log(userId);
-    const stActivity = await Studentactivity.findById(id, {include: ['student', 'activity']});
+    const stActivity = await Studentactivity.findById(
+      id, {
+        include: [
+          {
+            relation: 'activity',
+            scope: {
+              include: 'exercises',
+            },
+          },
+        ],
+      });
+
+    const stu = await Students.findById(stActivity.toJSON().studentId);
+    const activity = stActivity.toJSON().activity;
     const corrector = await Students.findById(userId);
     const codes = {};
     if (!stActivity.corrector2Id) {
       let folder;
-      let path = Act.exercises[0].file.split('/');
+      let path = activity.exercises[0].path.split('/');
       path = path[0];
       if (fs.existsSync('/home/ubuntu/activityFiles')) {
         folder = '/home/ubuntu/activityFiles';
@@ -171,9 +182,9 @@ module.exports = function(Studentactivity) {
       await fs.mkdirSync(`${folder}/${id}`);
       await fs.mkdirSync(`${folder}/${id}/${path}`);
       await Promise.all(
-        Act.exercises.map(async r => {
-          let path2 = r.file.split('/');
-          let file = r.file;
+        activity.exercises.map(async r => {
+          let path2 = r.path.split('/');
+          let file = r.path;
           if (stActivity.language) {
             file = file.substring(0, file.length - 2) + stActivity.language;
           }
