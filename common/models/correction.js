@@ -31,73 +31,42 @@ module.exports = function(Correction) {
   ) {
     const StudentActivity = Correction.app.models.StudentActivity;
     const Student = Correction.app.models.Student;
-    const Activity = Correction.app.models.Activity;
     const Notification = Correction.app.models.Notification;
-    const stuAct = await StudentActivity.findById(data.studentActivityId);
+    const stuAct = await StudentActivity.findById(
+      data.studentActivityId, {
+        include: {
+          activity: 'exercises'
+        }
+      });
+
     const corr = await Correction.findById(data.id);
-    const act = await Activity.findById(stuAct.activityId);
+    const act = stuAct.toJSON().activity;
     const stCorr = await Student.findById(corr.correctorId);
     const prevMsg = await Notification.findOne({
       where: {targetURL: `/correcao.html?${data.id}`},
     });
-    if (!act.exercises[0].tests && !stuAct.corrector2Id && stuAct.correctorId) {
+    if (!act.exercises[0].corrections && !stuAct.corrector2Id && stuAct.correctorId) {
       stuAct.updateAttributes({corrector2Id: 0});
       stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1, availableUntil: 0});
     }
     if (prevMsg) {
       prevMsg.destroy();
     }
-    // Notification.create({
-    //   studentId: stuAct.studentId,
-    //   createdAt: moment().toDate(),
-    //   message: 'Sua correção terminou, clique para dar o feedback.',
-    //   targetURL: `/feedback.html?${data.id}`,
-    // });
   });
 
-  // Correction.afterRemote('prototype.__create__feedbacks', async function(
-  //   ctx,
-  //   data
-  // ) {
-  //   const StudentActivity = Correction.app.models.StudentActivity;
-  //   const Activity = Correction.app.models.Activity;
-  //   const Notification = Correction.app.models.Notification;
-  //   const Student = Correction.app.models.Student;
-  //   const corr = await Correction.findById(data.correctionId);
-  //   const stAct = await StudentActivity.findById(corr.studentActivityId);
-  //   const Act = await Activity.findById(stAct.activityId);
-  //   const stCorr = await Student.findById(corr.correctorId);
-  //   const stu = await Student.findById(stAct.studentId);
-  //   const prevMsg = await Notification.findOne({
-  //     where: {targetURL: `/feedback.html?${corr.id}`},
-  //   });
-  //   if (!Act.exercises[0].tests && !stAct.corrector2Id && stAct.correctorId) {
-  //     stAct.updateAttributes({corrector2Id: 0});
-  //     stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1});
-  //   }
-  //   stCorr.correctionPoints++;
-  //   stCorr.availableUntil = 0;
-  //   stCorr.updateAttributes({
-  //     correctionPoints: stCorr.correctionPoints + 1,
-  //     availableUntil: 0,
-  //   });
-  //   stu.updateAttributes({availableUntil: 0});
-  //   if (prevMsg) {
-  //     prevMsg.destroy();
-  //   }
-  // });
-
   Correction.finishCorrection = async function(id) {
-    const Activity = Correction.app.models.Activity;
-    const corr = await Correction.findById(id, {
-      include: 'studentActivity',
+    const correction = await Correction.findById(id, {
+      include: 
+        {studentActivity: {
+          activity: 'exercises',
+        },
+      },
     });
-    const a = corr.toJSON();
-    const Act = await Activity.findById(a.studentActivity.activityId);
-    const levels = Act.exercises.length;
+    const corr = correction.toJSON();
+    const levels = corr.studentActivity.activity.exercises.length;
     const file = await axios({
       url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${
-        a.studentActivity.id
+        corr.studentActivity.id
       }.zip`,
       responseType: 'stream',
     });
@@ -107,7 +76,7 @@ module.exports = function(Correction) {
           .createWriteStream(
             __dirname +
               '/../../../activityFiles/' +
-              a.studentActivity.id +
+              corr.studentActivity.id +
               '.zip'
           )
           .on('finish', () => {
@@ -120,42 +89,43 @@ module.exports = function(Correction) {
       'unzip -o ' +
         __dirname +
         '/../../../activityFiles/' +
-        a.studentActivity.id +
+        corr.studentActivity.id +
         ' -d ' +
         __dirname +
         '/../../../activityFiles/' +
-        a.studentActivity.id
+        corr.studentActivity.id
     );
     await execSync(
       'rm ' +
         __dirname +
         '/../../../activityFiles/' +
-        a.studentActivity.id +
+        corr.studentActivity.id +
         '.zip'
     );
-    const correction = await check.runTest(
-      Act.exercises,
-      a.studentActivity.id,
-      a.studentActivity.language === 'py'
+    const correctionTest = await check.runTest(
+      corr.studentActivity.activity.exercises,
+      corr.studentActivity.id,
+      corr.studentActivity.language === 'py'
     );
     await execSync(
-      'rm -rf ' + __dirname + '/../../../activityFiles/' + a.studentActivity.id
+      'rm -rf ' + __dirname + '/../../../activityFiles/' + corr.studentActivity.id
     );
     let lastRight = 0;
     let errou = false;
     let correctionmsg = '';
-    let correctorAcuracy = [];
-    correction.map((lvl, i) => {
+    let autocorrectionCheck = {};
+    correctionTest.forEach((lvl, i) => {
       correctionmsg += `Exercício ${lvl[0].level}:\n`;
-      lvl.map(t => {
+      const lvlName = `ex0${i}`;
+      lvl.forEach(t => {
         correctionmsg += `${t.test}:\n`;
         if (!t.correct) {
           errou = true;
           correctionmsg += 'ERRADO! \n\n';
-          correctorAcuracy[i] = 'Não';
+          autocorrectionCheck[lvlName] = false;
         } else {
           correctionmsg += 'CERTO! \n\n';
-          if (correctorAcuracy[i] !== 'Não') correctorAcuracy[i] = 'Sim';
+          if (autocorrectionCheck[lvlName] !== false) autocorrectionCheck[lvlName] = true;
         }
       });
       if (!errou) {
@@ -163,83 +133,80 @@ module.exports = function(Correction) {
       }
       correctionmsg += '\n';
     });
-    corr.message = correctionmsg;
-    corr.grade = lastRight / levels;
-    corr.started = false;
-    corr.save();
-    return {
-      msg: correctionmsg,
+    await correction.updateAttributes({
+      message: correctionmsg,
       grade: lastRight / levels,
-      cheat: a.cheat,
+      started: false,
+    });
+    return {
+      grade: lastRight / levels,
       corr,
-      Act,
-      correctorAcuracy,
+      autocorrectionCheck,
     };
   };
 
   Correction.afterRemote('finishCorrection', async function(ctx, data) {
+    console.log(data.autocorrectionCheck);
     const Student = Correction.app.models.Student;
+    const Pdf = Correction.app.models.Pdf;
     const Notification = Correction.app.models.Notification;
     const StudentActivity = Correction.app.models.StudentActivity;
-    const corr = data.corr.toJSON();
-    const stu = await Student.findById(corr.studentActivity.studentId, {
-      include: {course: 'activities'},
+    const corr = data.corr;
+    const stuCorr = await Student.findById(data.corr.correctorId);
+    const stu = await Student.findById(data.corr.studentId);
+    const activity = data.corr.studentActivity.activity;
+    const stuAct = data.corr.studentActivity;
+    const nextLevel = await Pdf.findOne({
+      where: {
+        courseId: activity.courseId,
+        levelNumber: activity.levelNumber + 1,
+      }
     });
-    const stuCorr = await Student.findById(corr.correctorId);
-    const stuAct = await StudentActivity.findById(corr.studentActivityId);
-    const corrMsg = data.msg.replace(/\n/g, '<br>');
-    const course = stu.toJSON();
-    let finalMsg;
+    
     let precision = 0;
-    let stuChanges = {};
-    if (data.cheat) {
-      finalMsg =
-        '<b>A pessoa que te corrigiu indicou que você burlou as regras' +
-        'da correção, seja copiando código ou usando trechos que ' +
-        'não conseguiu explicar, portanto sua nota é zero e você ' +
-        'terá que refazer a fase</b>';
-      stuAct.finishedAt = undefined;
-      stuAct.correctorId = undefined;
-      stuAct.fails++;
+    const stuChanges = {};
+    const stuActChanges = {};
+    if (data.corr.cheat) {
+      stuActChanges.finishedAt = undefined;
+      stuActChanges.correctorId = undefined;
+      stuActChanges.fails = stuAct.fails + 1;
     } else if (
-      data.grade >= course.course.activities[stu.activityNumber].minGrade
+      data.grade >= activity.minGrade
     ) {
-      finalMsg =
-        'Parabéns, você passou de fase! Acesse a plataforma ' +
-        'para ver os próximos desafios.';
-      stuChanges.activityNumber = stu.activityNumber + 1;
+      stuChanges.activityNumber = activity.levelNumber + 1;
       stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
-      const language = stu.activityNumber > 7 ? 'html' : undefined;
+      const language = stu.levelNumber > 6 ? 'html' : 'js';
       StudentActivity.create({
         studentId: stu.id,
-        activityId: course.course.activities[stuChanges.activityNumber].id,
+        activityId: nextLevel.id,
         createdAt: moment().toDate(),
         fails: 0,
         language,
       });
     } else {
-      finalMsg =
-        'Com essa nota você não conseguiu avançar, corrija o ' +
-        'que estiver errado e finalize a atividade novamente.';
-      stuAct.finishedAt = undefined;
-      if (stuAct.prevCorrectors) stuAct.prevCorrectors.push(stuAct.correctorId);
-      else stuAct.prevCorrectors = [stuAct.correctorId];
-      stuAct.correctorId = undefined;
-      stuAct.fails++;
+      if (stuAct.prevCorrectors) {
+        stuActChanges.prevCorrectors = [...stuAct.precisionCoins, stuAct.correctorId];
+      } else {
+        stuActChanges.prevCorrectors = [stuAct.correctorId];
+      }
+      stuActChanges.finishedAt = undefined;
+      stuActChanges.correctorId = undefined;
+      stuActChanges.fails = stuAct.fails + 1;
     }
-    for (let i = 0; i < data.correctorAcuracy.length; i++) {
-      if (data.correctorAcuracy[i] === corr['ex0' + i].works) {
-        precision += 1 / data.correctorAcuracy.length;
+    for (let i in data.autocorrectionCheck) {
+      if (data.autocorrectionCheck[i] === corr[i]) {
+        precision += 1 / activity.exercises.length;
       }
     }
     let precisionCoins = 0;
     if (precision > 0.999) {
       precisionCoins = 30
     }
-    stuCorr.save();
-    stuAct.save();
-    console.log(stuChanges);
-    console.log(precision);
+
+    if (stuActChanges.fails) {
+      const newStAct = await StudentActivity.findById(stuAct.id);
+      newStAct.updateAttributes(stuActChanges);
+    }
     stu.updateAttributes({...stuChanges, availableUntil: 0});
     stuCorr.updateAttributes({
       correctionPoints: stuCorr.correctionPoints + 1,
@@ -277,10 +244,9 @@ module.exports = function(Correction) {
     const corr = await Correction.findById(id, {include: 'studentActivity'});
     const stu = await Student.findById(corr.toJSON().studentActivity.studentId);
     const stuCorr = await Student.findById(corr.correctorId);
-    stu.updateAttributes({availableUntil: 'correction'});
-    stuCorr.updateAttributes({availableUntil: 'correction'});
-    corr.started = true;
-    corr.save();
+    await stu.updateAttributes({availableUntil: 'correction'});
+    await stuCorr.updateAttributes({availableUntil: 'correction'});
+    await corr.updateAttributes({ started: true });
   };
 
   Correction.remoteMethod('startCorrection', {
