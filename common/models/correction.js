@@ -413,14 +413,20 @@ module.exports = function(Correction) {
   });
 
   Correction.owned = async function(id) {
-    let corrs = await Correction.find({include: 'studentActivity'});
-    const filtered = corrs.filter((el, i) => {
-      let co = JSON.stringify(el);
-      co = JSON.parse(co);
-      return co.correctorId === id ||
-      (co.studentActivity && co.studentActivity.studentId === id);
+    const corrs = await Correction.find({
+      where: {
+        and: [
+          {grade: {gt: -1}},
+          {or: [
+            {studentId: id},
+            {correctorId: id},
+            {correcto2Id: id},
+          ]}
+        ]
+      },
+      include: 'studentActivity'
     });
-    return filtered;
+    return corrs;
   };
 
   Correction.remoteMethod('owned', {
