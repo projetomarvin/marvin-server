@@ -66,7 +66,7 @@ module.exports = function(Correction) {
     const levels = corr.studentActivity.activity.exercises.length;
     const file = await axios({
       url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${
-        corr.studentActivity.id
+        corr.studentActivityId
       }.zip`,
       responseType: 'stream',
     });
