@@ -14,6 +14,9 @@ module.exports = {
         const a = Promise.all(
           e.corrections.map(async t => {
             let isValid = Boolean(t.result[0] === '/');
+            if (isValid) {
+              t.result = t.result.slice(1, -1);
+            }
             let test;
             if (!t.output) t.output = '';
             if (python) {
