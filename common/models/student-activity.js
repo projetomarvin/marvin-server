@@ -115,7 +115,7 @@ module.exports = function(Studentactivity) {
       list.push({[st.id]: cpoints + lvl});
       sum += cpoints + lvl;
     });
-    console.log(list);
+    console.log('possíveis corretores: ', list);
     list.map(u => {
       for (var usr in u) {
         if (u.hasOwnProperty(usr)) {
@@ -245,13 +245,14 @@ module.exports = function(Studentactivity) {
       await up;
     }
     console.log(stActivity.correctorId, stActivity.corrector2Id);
-    if (!stActivity.correctorId) stActivity.correctorId = userId;
-    else stActivity.corrector2Id = userId;
-    stActivity.finishedAt = moment().toDate();
-    stu.correctionPoints--;''
-    stu.availableUntil = 'correction'
+    const stActChanges = {};
+    if (!stActivity.correctorId) stActChanges.correctorId = userId;
+    else stActChanges.corrector2Id = userId;
+    stActChanges.finishedAt = moment().toDate();
+    stu.correctionPoints--;
+    stu.availableUntil = 'correction';
     stu.save();
-    stActivity.save();
+    stActivity.updateAttributes(stActChanges);
     const corr = await correction.create({
       studentActivityId: id,
       correctorId: userId,
@@ -413,46 +414,80 @@ module.exports = function(Studentactivity) {
     },
   });
 
-  Studentactivity.redo = async function(id) {
+  // Studentactivity.redo = async function(id) {
+  //   const Student = Studentactivity.app.models.Student;
+  //   const Act = await Studentactivity.findById(id);
+  //   let act = JSON.stringify(Act);
+  //   act = JSON.parse(act);
+  //   const st = await Student.findById(act.studentId, {
+  //     include: 'studentActivities',
+  //   });
+  //   let stu = JSON.stringify(st);
+  //   stu = JSON.parse(stu);
+  //   const latestAct = stu.studentActivities.sort((a, b) =>
+  //     new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1
+  //   )[stu.studentActivities.length - 1];
+  //   console.log(stu, latestAct);
+  //   Act.fails = NaN;
+  //   Act.correctorId = undefined;
+  //   Act.finishedAt = undefined;
+  //   Studentactivity.destroyById(latestAct.id);
+  //   st.updateAttributes({activityNumber: st.activityNumber - 1});
+  //   Act.save();
+  // };
+
+  // Studentactivity.afterRemote('redo', (context, remoteMethodOutput, next) => {
+  //   let res = context.res;
+  //   res.redirect('https://app.projetomarvin.com/atividades.html');
+  // });
+
+  // Studentactivity.remoteMethod('redo', {
+  //   accepts: {
+  //     arg: 'id',
+  //     type: 'string',
+  //     required: true,
+  //   },
+  //   returns: {
+  //     arg: 'events',
+  //     root: true,
+  //   },
+  //   http: {
+  //     path: '/:id/redo',
+  //     verb: 'get',
+  //   },
+  // });
+
+  Studentactivity.fix = async (req) => {
+    const Pdf = Studentactivity.app.models.Pdf;
     const Student = Studentactivity.app.models.Student;
-    const Act = await Studentactivity.findById(id);
-    let act = JSON.stringify(Act);
-    act = JSON.parse(act);
-    const st = await Student.findById(act.studentId, {
-      include: 'studentActivities',
+    const st = await Student.findById(req.accessToken.userId);
+    const act = await Pdf.findOne({where: {
+      and: [
+        {trail: 'main'},
+        {courseId: st.courseId},
+        {levelNumber: st.activityNumber},
+      ]},
     });
-    let stu = JSON.stringify(st);
-    stu = JSON.parse(stu);
-    const latestAct = stu.studentActivities.sort((a, b) =>
-      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1
-    )[stu.studentActivities.length - 1];
-    console.log(stu, latestAct);
-    Act.fails = NaN;
-    Act.correctorId = undefined;
-    Act.finishedAt = undefined;
-    Studentactivity.destroyById(latestAct.id);
-    st.updateAttributes({activityNumber: st.activityNumber - 1});
-    Act.save();
+    console.log(act);
+    const stAct = await Studentactivity.create({
+      createdAt: new Date(),
+      language: st.activityNumber < 6 ? 'js' : 'html',
+      studentId: req.accessToken.userId,
+      activityId: act.id,
+      fails: 0,
+    });
+    return stAct;
   };
 
-  Studentactivity.afterRemote('redo', (context, remoteMethodOutput, next) => {
-    let res = context.res;
-    res.redirect('https://app.projetomarvin.com/atividades.html');
-  });
-
-  Studentactivity.remoteMethod('redo', {
-    accepts: {
-      arg: 'id',
-      type: 'string',
-      required: true,
-    },
+  Studentactivity.remoteMethod('fix', {
+    accepts: {arg: 'req', type: 'object', http: {source: 'req'}},
     returns: {
       arg: 'events',
       root: true,
     },
     http: {
-      path: '/:id/redo',
-      verb: 'get',
+      path: '/fix',
+      verb: 'post',
     },
-  });
+  })
 };

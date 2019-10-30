@@ -13,6 +13,7 @@ module.exports = {
       fase.map(async function(e, i) {
         const a = Promise.all(
           e.corrections.map(async t => {
+            let isValid = Boolean(t.result[0] === '/');
             let test;
             if (!t.output) t.output = '';
             if (python) {
@@ -23,7 +24,7 @@ module.exports = {
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
             }
-	    console.log('RESULT', t, test);
+	          console.log('RESULT', t, test);
             // test.result = eval(test.result);
             const answer = {
               level: i,
@@ -43,7 +44,7 @@ module.exports = {
               answer.correct = false;
               answer.test = test;
               return answer;
-            } else if (t.function) {
+            } else if (isValid) {
               let test2, test3;
               if (python) {
                 test2 = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
@@ -52,9 +53,17 @@ module.exports = {
                 test2 = await check(e.path, t.param, id);
                 test3 = await check(e.path, t.param, id);
               }
-              console.log('!TO RODANDO A FUNCAO', t.function, eval(t.function));
-              answer.test = 'testando na função: ' + t.function;
-              if (eval(t.function)) {
+              answer.test += '\nOutros resultados:\n' +
+              test2.result +
+              ', ' +
+              test3.result;
+              if (
+                t.result &&
+                test.output.toString() === t.output &&
+                new RegExp(t.result, 'g').test(test.result) &&
+                new RegExp(t.result, 'g').test(test2.result) &&
+                new RegExp(t.result, 'g').test(test3.result)
+              ) {
                 answer.correct = true;
                 return answer;
               } else {
@@ -69,14 +78,6 @@ module.exports = {
                   t.result &&
                   arraysEqual(test.result, t.result) &&
                   test.output.toString() == t.output)
-              ) {
-                answer.correct = true;
-                return answer;
-              } else if (
-                t.result &&
-                t.result.test &&
-                test.output.toString() === t.output &&
-                t.result.test(test.result)
               ) {
                 answer.correct = true;
                 return answer;

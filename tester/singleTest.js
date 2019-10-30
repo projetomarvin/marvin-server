@@ -9,6 +9,10 @@ function arraysEqual(arr1, arr2) {
 async function run(code, name, tests, python) {
   const run = Promise.all(
     tests.map(async (t) => {
+      let isValid = Boolean(t.result[0] === '/');
+      if (isValid) {
+        t.result = t.result.slice(1, -1);
+      }
       let test;
       if (!t.output) t.output = '';
       if (python) {
@@ -37,16 +41,26 @@ async function run(code, name, tests, python) {
         answer.correct = false;
         answer.test = test;
         return answer;
-      } else if (t.function) {
+      } else if (isValid) {
+        let test2, test3;
         if (python) {
-          await pyCheck(code, t.param, name);
-          await pyCheck(code, t.param, name);
+          test2 = await pyCheck(code, t.param, name);
+          test3 = await pyCheck(code, t.param, name);
         } else {
-          await check(code, t.param, name);
-          await check(code, t.param, name);
+          test2 = await check(code, t.param, name);
+          test3 = await check(code, t.param, name);
         }
-        answer.test = 'testando na função: ' + t.function;
-        if (eval(t.function)) {
+        answer.test += '\nOutros resultados:\n' +
+        test2.result +
+        ', ' +
+        test3.result;
+        if (
+          t.result &&
+          test.output.toString() === t.output &&
+          new RegExp(t.result, 'g').test(test.result) &&
+          new RegExp(t.result, 'g').test(test2.result) &&
+          new RegExp(t.result, 'g').test(test3.result)
+        ) {
           answer.correct = true;
           return answer;
         } else {

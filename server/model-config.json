@@ -89,7 +89,7 @@
           "prototype.patchAttributes": true,
           "cancelCorrection": true,
           "answerCorrectionInvite": true,
-          "redo": true
+          "fix": true
         }
       }
     }
