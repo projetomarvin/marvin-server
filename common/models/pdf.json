@@ -46,14 +46,14 @@
       "model": "exercise",
       "foreignKey": ""
     },
-    "course": {
-      "type": "belongsTo",
-      "model": "course",
-      "foreignKey": ""
-    },
     "studentActivity": {
       "type": "hasMany",
       "model": "studentActivity",
+      "foreignKey": ""
+    },
+    "courses": {
+      "type": "hasAndBelongsToMany",
+      "model": "course",
       "foreignKey": ""
     }
   },

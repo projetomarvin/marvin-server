@@ -26,7 +26,7 @@
       }
     },
     "activities": {
-      "type": "hasMany",
+      "type": "hasAndBelongsToMany",
       "model": "pdf",
       "foreignKey": ""
     },
@@ -47,7 +47,15 @@
       "principalType": "ROLE",
       "principalId": "facilitator",
       "permission": "ALLOW",
-      "property": "create"
+      "property": [
+        "create",
+        "find",
+        "createNew",
+        "__create__students",
+        "__create__activities",
+        "__link__activities",
+        "__unlink__activities"
+      ]
     },
     {
       "accessType": "*",
@@ -61,27 +69,6 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "findById"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "facilitator",
-      "permission": "ALLOW",
-      "property": "__create__students"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "facilitator",
-      "permission": "ALLOW",
-      "property": "__create__activities"
-    },
-    {
-      "accessType": "EXECUTE",
-      "principalType": "ROLE",
-      "principalId": "facilitator",
-      "permission": "ALLOW",
-      "property": "find"
     }
   ],
   "methods": {}

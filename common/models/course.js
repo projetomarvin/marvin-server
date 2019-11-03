@@ -7,4 +7,39 @@ module.exports = function(Course) {
     body.createdAt = moment();
     next();
   });
+
+  Course.createNew = async (data) => {
+    const course = await Course.create({
+      name: data.name,
+      createdAt: new Date(),
+    });
+    if (data.clone) {
+      const courseAct = await Course.findOne({
+        order: 'createdAt DESC',
+        include: 'activities',
+        skip: 1,
+      });
+      const acts = courseAct.toJSON();
+      acts.activities.forEach(i => {
+        course.activities.add(i.id, e => console.log(e));
+      });
+    }
+  };
+
+  Course.remoteMethod('createNew', {
+    accepts: {
+      arg: 'data',
+      type: 'object',
+      http: { source: 'body' },
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/new',
+      verb: 'post',
+    },
+  });
 };

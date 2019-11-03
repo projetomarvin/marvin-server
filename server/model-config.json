@@ -46,6 +46,9 @@
           "find": true,
           "findById": true,
           "create": true,
+          "createNew": true,
+          "prototype.__link__activities": true,
+          "prototype.__unlink__activities": true,
           "prototype.__create__students": true,
           "prototype.__create__activities": true
         }
