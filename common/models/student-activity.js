@@ -458,16 +458,14 @@ module.exports = function(Studentactivity) {
   // });
 
   Studentactivity.fix = async (req) => {
-    const Pdf = Studentactivity.app.models.Pdf;
+    const Course = Studentactivity.app.models.Course;
     const Student = Studentactivity.app.models.Student;
-    const st = await Student.findById(req.accessToken.userId);
-    const act = await Pdf.findOne({where: {
-      and: [
-        {trail: 'main'},
-        {courseId: st.courseId},
-        {levelNumber: st.activityNumber},
-      ]},
-    });
+    let st = await Student.findById(req.accessToken.userId,
+      {include: {course: 'activities'}});
+    st = st.toJSON();
+    const act = st.course.activities.find(
+      e => e.trail === 'main' && e.levelNumber === st.activityNumber,
+    );
     console.log(act);
     const stAct = await Studentactivity.create({
       createdAt: new Date(),
@@ -489,5 +487,5 @@ module.exports = function(Studentactivity) {
       path: '/fix',
       verb: 'post',
     },
-  })
+  });
 };
