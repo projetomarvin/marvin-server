@@ -31,6 +31,7 @@ module.exports = function(Student) {
         cb(null, {...res.data, id});
       })
       .catch(err => {
+        console.log(err);
         cb(null, 'not found');
       });
   };
