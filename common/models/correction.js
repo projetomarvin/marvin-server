@@ -64,12 +64,17 @@ module.exports = function(Correction) {
     });
     const corr = correction.toJSON();
     const levels = corr.studentActivity.activity.exercises.length;
-    const file = await axios({
-      url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${
-        corr.studentActivityId
-      }.zip`,
-      responseType: 'stream',
-    });
+    let file;
+    try {
+      file = await axios({
+        url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${
+          corr.studentActivityId
+        }.zip`,
+        responseType: 'stream',
+      });
+    } catch (error) {
+      throw error;
+    }
     const writeFile = new Promise(resolve => {
       file.data.pipe(
         fs
