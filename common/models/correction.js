@@ -189,8 +189,8 @@ module.exports = function(Correction) {
       } else {
         stuActChanges.prevCorrectors = [stuAct.correctorId];
       }
-      stuActChanges.finishedAt = undefined;
-      stuActChanges.correctorId = undefined;
+      stuActChanges.finishedAt = null;
+      stuActChanges.correctorId = null;
       stuActChanges.fails = stuAct.fails + 1;
     }
     for (let i in data.autocorrectionCheck) {
@@ -204,6 +204,7 @@ module.exports = function(Correction) {
     }
 
     if (stuActChanges.fails) {
+      console.log("err");
       const newStAct = await StudentActivity.findById(stuAct.id);
       newStAct.updateAttributes(stuActChanges);
     }

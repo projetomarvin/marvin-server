@@ -117,7 +117,6 @@ module.exports = function(Student) {
   Student.beforeRemote('prototype.patchAttributes', async function(ctx, data) {
     const uId = ctx.req.accessToken.userId.toJSON();
     const st = await Student.findById(uId);
-    console.log(ctx.req.body);
     if (
       ctx.req.body.availableUntil &&
       ctx.req.body.availableUntil !== 'available'
