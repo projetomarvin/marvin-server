@@ -13,7 +13,10 @@ module.exports = {
       fase.map(async function(e, i) {
         const a = Promise.all(
           e.corrections.map(async t => {
-            let isValid = Boolean(t.result[0] === '/');
+            let isValid;
+            if (t.result) {
+              isValid = Boolean(t.result[0] === '/');
+            }
             if (isValid) {
               t.result = t.result.slice(1, -1);
             }
