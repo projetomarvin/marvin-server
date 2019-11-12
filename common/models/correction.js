@@ -73,7 +73,7 @@ module.exports = function(Correction) {
         responseType: 'stream',
       });
     } catch (error) {
-      console.log("Algo deu errado");
+      console.log("Algo deu errado", error.response);
       throw error;
     }
     const writeFile = new Promise(resolve => {
