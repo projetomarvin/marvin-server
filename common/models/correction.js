@@ -191,7 +191,7 @@ module.exports = function(Correction) {
       });
     } else {
       if (stuAct.prevCorrectors) {
-        stuActChanges.prevCorrectors = [...stuAct.precisionCoins, stuAct.correctorId];
+        stuActChanges.prevCorrectors = [...stuAct.prevCorrectors, stuAct.correctorId];
       } else {
         stuActChanges.prevCorrectors = [stuAct.correctorId];
       }
