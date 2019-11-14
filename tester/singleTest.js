@@ -9,7 +9,10 @@ function arraysEqual(arr1, arr2) {
 async function run(code, name, tests, python) {
   const run = Promise.all(
     tests.map(async (t) => {
-      let isValid = Boolean(t.result[0] === '/');
+      let isValid;
+      if (t.result) {
+        isValid = Boolean(t.result[0] === '/');
+      }
       if (isValid) {
         t.result = t.result.slice(1, -1);
       }
