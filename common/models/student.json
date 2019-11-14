@@ -75,7 +75,8 @@
         "linkGithub",
         "pushToGit",
         "transferCoins",
-        "buy"
+        "buy",
+        "dryRun"
       ]
     },
     {

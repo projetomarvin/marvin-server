@@ -68,6 +68,7 @@
           "findById": true,
           "getUsername": true,
           "pushToGit": true,
+          "dryRun": true,
           "checkRepository": true,
           "prototype.patchAttributes": true,
           "linkGithub": true,

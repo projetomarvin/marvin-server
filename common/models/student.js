@@ -3,6 +3,7 @@ const axios = require('axios');
 const moment = require('moment');
 const sgMail = require('@sendgrid/mail');
 
+const dryRun = require('../../tester/singleTest.js');
 const sgKey = process.env.SENDGRID_API_KEY;
 
 module.exports = function(Student) {
@@ -367,5 +368,27 @@ module.exports = function(Student) {
     returns: {root: true},
     description: 'Transfers coins from one student to other',
     http: {path: '/:id/transferCoins', verb: 'put'},
+  });
+
+  Student.dryRun = async function (fk, {code, id}) {
+    const stu = await Student.findById(id);
+    const Exercise = Student.app.models.Exercise;
+    const ex = await Exercise.findById(fk);
+    const functionName = /\/([a-z1-9]+?)\./gi.exec(ex.path)[1];
+    if (stu.coins < 100) {
+      throw "Moedas insuficientes!"
+    }
+    const result = await dryRun(code, functionName, ex.corrections);
+    await stu.updateAttributes({coins: stu.coins - 100});
+    return result;
+  }
+
+  Student.remoteMethod('dryRun', {
+    accepts: [
+      { arg: 'fk', type: 'string', required: true },
+      { arg: 'data', type: 'object', http: { source: 'body', },  required: true, },
+    ],
+    returns: { arg: 'events', root: true },
+    http: { path: '/:fk/dryRun', verb: 'post' },
   });
 };
