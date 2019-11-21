@@ -74,6 +74,7 @@
           "linkGithub": true,
           "prototype.__destroyById__notifications": true,
           "buy": true,
+          "dice": true,
           "transferCoins": true,
           "prototype.__create__levelLogs": true
         }

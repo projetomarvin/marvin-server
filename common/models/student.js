@@ -294,6 +294,7 @@ module.exports = function(Student) {
           throw 'Moedas insuficientes!';
         }
         changes.coins = stu.coins - 47;
+        changes.dice = true;
         sendMail(stu.username, 'dado');
         break;
       case 'music3':
@@ -338,6 +339,56 @@ module.exports = function(Student) {
     returns: {root: true},
     description: 'Buys products with coins',
     http: {path: '/:id/buy/:product', verb: 'post'},
+  });
+
+  Student.dice = async function(id, result) {
+    const stu = await Student.findById(id);
+    const changes = {};
+    if (!stu.dice) {
+      throw "Você não tem mais dados para jogar :/"
+    }
+    changes.dice = false;
+    switch (result) {
+      case 1:
+        changes.correctionPoints = stu.correctionPoints + 1;
+        break;
+
+      case 2:
+        changes.correctionPoints = stu.correctionPoints - 1;
+        break;
+        
+      case 3:
+        changes.coins = stu.coins + 47;
+        break;
+
+      case 4:
+        changes.coins = stu.coins - 37;
+        break;
+
+      default:
+        break;
+    }
+    const nStu = await stu.updateAttributes(changes);
+    console.log(stu, nStu, changes);
+    return true;
+  };
+
+  Student.remoteMethod('dice', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'result',
+        type: 'number',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'Process dice result',
+    http: {path: '/:id/dice/:result', verb: 'post'},
   });
 
   Student.transferCoins = async function(id, data) {

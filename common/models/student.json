@@ -30,10 +30,14 @@
     "panic": {
       "type": "boolean"
     },
+    "dice": {
+      "type": "boolean"
+    },
     "pendingCorrection": {
       "type": "object"
     }
   },
+  "hidden": ["githubAccessToken"],
   "validations": [],
   "relations": {
     "course": {
@@ -76,6 +80,7 @@
         "pushToGit",
         "transferCoins",
         "buy",
+        "dice",
         "dryRun"
       ]
     },
