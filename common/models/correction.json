@@ -49,6 +49,9 @@
     "ex09": {
       "type": "boolean",
       "required": false
+    },
+    "marvinCorrection": {
+      "type": "object"
     }
   },
   "validations": [],
@@ -62,6 +65,11 @@
       "type": "hasOne",
       "model": "student",
       "foreignKey": "correctorId"
+    },
+    "student": {
+      "type": "belongsTo",
+      "model": "student",
+      "foreignKey": "studentId"
     },
     "feedbacks": {
       "type": "hasOne",

@@ -37,6 +37,9 @@
     "trail": {
       "type": "string",
       "default": "main"
+    },
+    "pdfURL": {
+      "type":"string"
     }
   },
   "validations": [],

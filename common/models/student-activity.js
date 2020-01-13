@@ -4,6 +4,9 @@ const axios = require('axios');
 const fs = require('fs');
 const {exec, execSync} = require('child_process');
 const AWS = require('aws-sdk');
+const { google } = require('googleapis');
+
+const GDrive = require('../../drive/index.js');
 
 const credentials = new AWS.SharedIniFileCredentials({profile: 'cori'});
 
@@ -26,7 +29,7 @@ module.exports = function(Studentactivity) {
           {relation: 'student'},
         ],
       });
-    stActivity =  stActivity.toJSON();
+    stActivity = stActivity.toJSON();
     try {
       const data = await Promise.all(
         stActivity.activity.exercises.map(async r => {
@@ -66,6 +69,175 @@ module.exports = function(Studentactivity) {
     http: {
       path: '/:id/checkFiles',
       verb: 'get',
+    },
+  });
+
+  async function listFiles(auth, id) {
+    const drive = google.drive({version: 'v3', auth});
+    try {
+      const result = await drive.files.list({
+        q: `'${id}' in parents and trashed = false`,
+        fields: '*',
+      });
+      return (result.data.files);
+    } catch (error) {
+      console.log(error);
+      return error.errors;
+    }
+  }
+
+  async function duplicateFile(auth, file) {
+    const drive = google.drive({version: 'v3', auth});
+    const owner = file.permissions.find(x => x.role == 'owner').emailAddress;
+    console.log(owner);
+    try {
+      const result = await drive.files.copy({
+        fileId: file.id,
+        requestBody: {
+          'name': 'Clone X',
+          'parents': [
+            '1dJUwJ-BUeENMC1RSmVFasP99o7hX8bS9',
+          ],
+        },
+      });
+      return (result.data.files);
+    } catch (error) {
+      console.log(error);
+      return error.errors;
+    }
+  }
+
+  function valdiateFile(files, fileName) {
+    const file = files.find(x => x.name === fileName);
+    return file;
+  }
+
+  Studentactivity.checkFilesDrive = async (id) => {
+    let stActivity = await Studentactivity.findById(
+      id, {
+        include: ['student', 'activity'],
+      },
+    );
+    stActivity = stActivity.toJSON();
+    const folderId = stActivity.student.GDriveURL.slice(39);
+    const auth = await GDrive();
+    const filesOnFolder = await listFiles(auth, folderId);
+    const file = valdiateFile(filesOnFolder, stActivity.activity.excelFileName);
+    if (!file) {
+      const err = new Error();
+      err.statusCode = 404;
+      err.message = 'file not found ' + stActivity.activity.excelFileName;
+      throw err;
+    }
+    return file;
+  };
+
+  Studentactivity.remoteMethod('checkFilesDrive', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/excel/checkFiles',
+      verb: 'get',
+    },
+  });
+
+  Studentactivity.beforeRemote('excelFinish', async function(ctx) {
+    const id = ctx.req.params.id;
+    const stActivity = await Studentactivity.findById(id, {include: 'student'});
+    const student = stActivity.toJSON().student;
+    if (stActivity.finishedAt) {
+      throw Error('atividade já finalizada');
+    } else if (student.correctionPoints <= 0) {
+      throw Error('pontos de correção insuficientes');
+    }
+    return;
+  });
+
+  Studentactivity.excelFinish = async function(id, fileUrl) {
+    console.log(fileUrl);
+    const Students = Studentactivity.app.models.Student;
+    const correction = Studentactivity.app.models.Correction;
+    const userId = await randomCorrector(id);
+    if (!userId) {
+      throw Error('Não há nenum corretor disponível');
+    }
+    const stActivity = await Studentactivity.findById(
+      id, {
+        include: [
+          {
+            relation: 'activity',
+            scope: {
+              include: 'exercises',
+            },
+          },
+        ],
+      },
+    );
+    const stu = await Students.findById(stActivity.toJSON().studentId);
+    const corrector = await Students.findById(userId);
+    const stActChanges = {};
+    if (!stActivity.correctorId) stActChanges.correctorId = userId;
+    else stActChanges.corrector2Id = userId;
+    stActChanges.finishedAt = moment().toDate();
+    stActChanges.fileUrl = fileUrl;
+    stu.correctionPoints--;
+    stu.availableUntil = 'correction';
+    stu.save();
+    stActivity.updateAttributes(stActChanges);
+    const corr = await correction.create({
+      studentActivityId: id,
+      correctorId: userId,
+      studentId: stActivity.studentId,
+      createdAt: moment().toDate(),
+    });
+    corrector.updateAttributes({availableUntil: 'correction'});
+    return {
+      filesURL: fileUrl,
+      corrector: corrector,
+      correction: corr,
+      student: stu,
+      activity: stActivity,
+    };
+  };
+
+  Studentactivity.afterRemote('excelFinish', async function(ctx, data) {
+    const Notification = Studentactivity.app.models.Notification;
+    Notification.create({
+      studentId: data.corrector.id,
+      createdAt: moment().toDate(),
+      message: `${data.student.email} te convidou para correção.
+        Clique para começar`,
+      targetURL: `correcao.html?${data.correction.id}`,
+    });
+  });
+
+  Studentactivity.remoteMethod('excelFinish', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'fileUrl',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/excel/finish',
+      verb: 'put',
     },
   });
 
@@ -466,10 +638,15 @@ module.exports = function(Studentactivity) {
     const act = st.course.activities.find(
       e => e.trail === 'main' && e.levelNumber === st.activityNumber,
     );
+    const isExcel = st.course.type === 'excel';
     console.log(act);
+    let language;
+    if (!isExcel) {
+      language = st.activityNumber < 6 ? 'js' : 'html';
+    }
     const stAct = await Studentactivity.create({
       createdAt: new Date(),
-      language: st.activityNumber < 6 ? 'js' : 'html',
+      language,
       studentId: req.accessToken.userId,
       activityId: act.id,
       fails: 0,

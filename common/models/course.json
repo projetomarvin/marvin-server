@@ -13,6 +13,11 @@
     "createdAt": {
       "type": "date",
       "required": true
+    },
+    "type": {
+      "type": "string",
+      "required": false,
+      "default": "code"
     }
   },
   "validations": [],

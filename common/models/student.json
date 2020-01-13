@@ -24,6 +24,9 @@
     "githubAccessToken": {
       "type": "string"
     },
+    "GDriveURL": {
+      "type": "string"
+    },
     "availableUntil": {
       "type": "any"
     },
@@ -50,8 +53,8 @@
       "model": "studentActivity",
       "foreignKey": ""
     },
-    "correction": {
-      "type": "belongsTo",
+    "corrections": {
+      "type": "hasMany",
       "model": "correction",
       "foreignKey": ""
     },
@@ -77,6 +80,7 @@
         "__create__levelLogs",
         "__destroyById__notifications",
         "linkGithub",
+        "linkGDrive",
         "pushToGit",
         "transferCoins",
         "buy",
@@ -96,7 +100,10 @@
       "principalType": "ROLE",
       "principalId": "facilitator",
       "permission": "ALLOW",
-      "property": "patchAttributes"
+      "property": [
+        "patchAttributes",
+        "showPending"
+      ]
     }
   ],
   "methods": {}

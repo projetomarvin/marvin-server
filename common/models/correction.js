@@ -43,15 +43,37 @@ module.exports = function(Correction) {
     const act = stuAct.toJSON().activity;
     const stCorr = await Student.findById(corr.correctorId);
     const prevMsg = await Notification.findOne({
-      where: {targetURL: `/correcao.html?${data.id}`},
+      where: {or: [{targetURL: `correcao.html?${data.id}`}, {targetURL: `/correcao.html?${data.id}`}]},
     });
-    if (!act.exercises[0].corrections && !stuAct.corrector2Id && stuAct.correctorId) {
+    if (!data.excel && !act.exercises[0].corrections && !stuAct.corrector2Id && stuAct.correctorId) {
       stuAct.updateAttributes({corrector2Id: 0});
       stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1, availableUntil: 0});
     }
     if (prevMsg) {
       prevMsg.destroy();
     }
+  });
+
+  Correction.finishExcel = async function (id) {
+    const correction = await Correction.findById(id);
+    if (!correction.marvinCorrector || !correction.correctedAt)
+      return true;
+  }
+
+  Correction.remoteMethod('finishExcel', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/excel/finish',
+      verb: 'post',
+    },
   });
 
   Correction.finishCorrection = async function(id) {

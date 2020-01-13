@@ -100,16 +100,3 @@ async function run(code, name, tests, python) {
 }
 
 module.exports = run;
-
-const code = `function mostrarNome() {
-  console.log("Marvin");
-}`;
-
-const corrections = [
-  {
-    // param: [],
-    output: 'Marvin',
-  },
-];
-
-// run(code, 'mostrarNome', corrections).then((r) => console.log(r));

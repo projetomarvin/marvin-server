@@ -2,8 +2,10 @@
 const axios = require('axios');
 const moment = require('moment');
 const sgMail = require('@sendgrid/mail');
+const { google } = require('googleapis');
 
 const dryRun = require('../../tester/singleTest.js');
+const GDrive = require('../../drive/index.js');
 const sgKey = process.env.SENDGRID_API_KEY;
 
 module.exports = function(Student) {
@@ -115,6 +117,59 @@ module.exports = function(Student) {
     http: {path: '/:id/linkGithub', verb: 'post'},
   });
 
+  function valdiateFolder(folder){
+    if (!folder.name.includes("Marvin Sheets - ")) {
+      return new Error('Nome da pasta inválido');
+    } else {
+      return true;
+    }
+  };
+
+  async function findFolder(auth, url) {
+    const drive = google.drive({version: 'v3', auth});
+    try {
+      const result = await drive.files.get({
+        fileId: url,
+        fields: '*',
+      });
+      return (result.data);
+    } catch (error) {
+      return error.errors;
+    }
+  }
+
+  Student.linkGDrive = async (path, id) => {
+    const stu = await Student.findById(id);
+    const auth = await GDrive();
+    const folder = await findFolder(auth, path)
+    console.log(folder);
+    const result = valdiateFolder(folder);
+    if (result === true) {
+      stu.updateAttributes({ GDriveURL: folder.webViewLink, activityNumber: 1 });
+      return true;
+    } else {
+      throw result;
+    }
+  }
+
+ Student.remoteMethod('linkGDrive', {
+    accepts: [
+      {
+        arg: 'url',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'Validate Google Drive folder',
+    http: {path: '/:id/checkDrievFolder', verb: 'post'},
+  });
+
   Student.beforeRemote('prototype.patchAttributes', async function(ctx, data) {
     const uId = ctx.req.accessToken.userId.toJSON();
     const st = await Student.findById(uId);
@@ -223,7 +278,7 @@ module.exports = function(Student) {
   Student.getUsername = async function(id) {
     const stu = await Student.findById(id);
     if (stu) {
-      return stu.username;
+      return stu.username || stu.email;
     } else {
       const err = new Error();
       err.status = 500;
@@ -242,6 +297,37 @@ module.exports = function(Student) {
     returns: {root: true},
     description: 'gets username from id',
     http: {path: '/:id/username', verb: 'get'},
+  });
+
+  Student.showPending = async function (id) {
+    const sts = await Student.find({ where: {
+      courseId: id,
+    }, include: {
+      relation: 'studentActivities',
+      scope: {
+        where: {finishedAt: {neq: null}},
+        include: {
+          relation: 'corrections',
+          scope: {
+            where: {marvinCorrection: undefined}
+          }
+        }
+      }
+    }});
+    return sts;
+  }
+
+  Student.remoteMethod('showPending', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+    ],
+    returns: {root: true},
+    description: 'pendinf excel correctoins',
+    http: {path: '/pending/course/:id/', verb: 'get'},
   });
 
   function sendMail(username, product) {
