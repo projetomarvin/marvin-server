@@ -115,6 +115,7 @@
           "finishCorrection": true,
           "finishExcel": true,
           "finishManual": true,
+          "excelMarvinCorrection": true,
           "startCorrection": true,
           "dryRun": true,
           "prototype.__create__feedbacks": true,

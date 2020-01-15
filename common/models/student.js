@@ -26,17 +26,23 @@ module.exports = function(Student) {
     next();
   });
 
-  Student.checkRepository = function(username, id, cb) {
-    const url = `https://api.github.com/repos/${username}/marvin?access_token=${process.env.GITHUB_TOKEN}`;
-    axios
-      .get(url)
-      .then(res => {
-        cb(null, {...res.data, id});
-      })
-      .catch(err => {
-        console.log(err);
-        cb(null, 'not found');
-      });
+  Student.checkRepository = async function(username, id) {
+    const url = `https://api.github.com/users/${username}/repos?access_token=${process.env.GITHUB_TOKEN}`;
+    try {
+      const res = await axios(url);
+      console.log(res.data);
+      const repo = res.data.find(x => x.full_name === `${username}/marvin`);
+      console.log(repo);
+      if (!repo) {
+        return 'repo not found';
+      }
+      return {...res.data, id};
+    } catch (error) {
+      console.log(error.response.data);
+      if (error.response.data.message === 'Not Found') {
+        return 'user not found';
+      }
+    }
   };
 
   Student.remoteMethod('checkRepository', {
@@ -51,7 +57,7 @@ module.exports = function(Student) {
   Student.afterRemote('checkRepository', async function(ctx, data) {
     const StudentActivity = Student.app.models.StudentActivity;
     const Course = Student.app.models.Course;
-    if (data !== 'not found') {
+    if (!typeof data === 'string') {
       // console.log(data.id, data.owner.login);
       const usr = await Student.findById(data.id);
       const course = await Course.findById(usr.courseId, {

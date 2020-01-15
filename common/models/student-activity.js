@@ -251,17 +251,6 @@ module.exports = function(Studentactivity) {
       order: 'createdAt DESC',
       limit: 2,
     });
-    let corrs;
-    if (prevAct[1]) {
-      corrs = [
-        ...sts.prevCorrectors || '',
-        prevAct[1].correctorId || '',
-        prevAct[1].corrector2Id || '',
-      ];
-    } else {
-      corrs = [...sts.prevCorrectors || ''];
-    }
-
     const currStudent = sts.toJSON().student;
     const list = [];
     const obj = {};
@@ -269,7 +258,6 @@ module.exports = function(Studentactivity) {
       const id = String(item.id);
       return (
         id !== String(sts.studentId) &&
-        !corrs.includes(id) &&
         new Date(item.availableUntil) > new Date() &&
         sts.correctorId !== id
       );

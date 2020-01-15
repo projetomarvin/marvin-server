@@ -55,10 +55,82 @@ module.exports = function(Correction) {
   });
 
   Correction.finishExcel = async function (id) {
-    const correction = await Correction.findById(id);
-    if (!correction.marvinCorrector || !correction.correctedAt)
+    const correction = await Correction.findById(
+      id,
+      {include: {
+        relation: 'studentActivity',
+        scope: {
+          include: 'activity'
+        }
+      } })
+    const corr = correction.toJSON();
+    if (!corr.marvinCorrector || !corr.correctedAt)
       return true;
+    let corrects =  0;
+    let matchingCorrections = 0;
+    for (const question in corr.marvinCorrector) {
+      if (corr.marvinCorrector.hasOwnProperty(question)) {
+        const q = corr.marvinCorrector[question];
+        if (corr[question] === q) {
+          matchingCorrections++;
+        }
+        if (q) {
+          corrects++;
+        }
+      }
+    }
+    const finalGrade = corrects / corr.studentActivity.activity.excelExNumber;
+    const fullMatch = corr.studentActivity.activity.excelExNumber === matchingCorrections;
+    await correction.updateAttributes({
+      grade: finalGrade,
+      started: false,
+    });
+    return {
+      corr,
+      fullMatch,
+      finalGrade,
+    }
   }
+
+  Correction.afterRemote('finishExcel', async (ctx, data) => {
+    if (!data.corr) {
+      return;
+    }
+    const Student = Correction.app.models.Student;
+    const Notification = Correction.app.models.Notification;
+    const StudentActivity = Correction.app.models.StudentActivity;
+    const stu = await Student.findById(data.corr.studentId);
+    const stuCorr = await Student.findById(data.corr.correctorId);
+    const stAct = await StudentActivity.findById(data.corr.studentActivityId);
+    const stuCorrChanges = {};
+    const stuChanges = {};
+    if (data.fullMatch) {
+      stuCorrChanges.coins = stuCorr.coins + 30;
+    }
+    stuCorrChanges.availableUntil = 0;
+    stuCorrChanges.correctionPoints = stuCorr.correctionPoints + 1;
+    stuChanges.availableUntil = 0;
+    if (data.finalGrade >= data.corr.studentActivity.activity.minGrade) {
+      stuChanges.activityNumber = stu.activityNumber + 1;
+      stuChanges.coins = stu.coins + (50 - 8 * data.corr.studentActivity.fails);
+    } else {
+      stAct.updateAttributes({
+        fails: stAct.fails + 1,
+        finishedAt: null,
+        correctorId: null,
+      });
+    }
+    await stuCorr.updateAttributes(stuCorrChanges);
+    await stu.updateAttributes(stuChanges);
+    Notification.create({
+      studentId: data.corr.studentId,
+      createdAt: moment().toDate(),
+      message: `Sua correção terminou e a
+       nota final foi ${Math.floor(data.finalGrade * 100)}%.
+       Clique para mais detalhes`,
+      targetURL: 'detalheNota.html?' + data.corr.id,
+    });
+  });
 
   Correction.remoteMethod('finishExcel', {
     accepts: {
@@ -73,6 +145,36 @@ module.exports = function(Correction) {
     http: {
       path: '/:id/excel/finish',
       verb: 'post',
+    },
+  });
+
+  Correction.excelMarvinCorrection = async function (id, data) {
+    const corr = await Correction.findById(id);
+    const updated = await corr.updateAttributes(data);
+    return updated;
+  }
+
+  Correction.remoteMethod('excelMarvinCorrection', {
+    accepts: [
+      {
+        arg: 'id',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'data',
+        type: 'object',
+        http: {source: 'body'},
+        required: true,
+      },
+    ],
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/excel/marvinCorrection',
+      verb: 'patch',
     },
   });
 
@@ -212,11 +314,6 @@ module.exports = function(Correction) {
         language,
       });
     } else {
-      if (stuAct.prevCorrectors) {
-        stuActChanges.prevCorrectors = [...stuAct.prevCorrectors, stuAct.correctorId];
-      } else {
-        stuActChanges.prevCorrectors = [stuAct.correctorId];
-      }
       stuActChanges.finishedAt = null;
       stuActChanges.correctorId = null;
       stuActChanges.fails = stuAct.fails + 1;
@@ -360,12 +457,8 @@ module.exports = function(Correction) {
         'não conseguiu explicar, portanto sua nota é zero e você ' +
         'terá que refazer a fase</b>';
       stuAct.finishedAt = undefined;
-      if (stuAct.prevCorrectors)
-        stuAct.prevCorrectors.push(stuAct.correctorId, stuAct.corrector2Id);
-      else stuAct.prevCorrectors = [stuAct.correctorId, stuAct.corrector2Id];
       stuAct.correctorId = undefined;
       stuAct.corrector2Id = undefined;
-      stuAct.prevCorrectors [corr.correctorId, corr.corrector2Id];
       stuAct.fails++;
     } else if (
       data.grade >= course.course.activities[stu.activityNumber].minGrade
@@ -389,7 +482,6 @@ module.exports = function(Correction) {
       stuAct.finishedAt = undefined;
       stuAct.correctorId = undefined;
       stuAct.corrector2Id = undefined;
-      stuAct.prevCorrectors [corr.correctorId, corr.corrector2Id];
       stuAct.fails++;
     }
     stuCorr.correctionPoints++;
