@@ -30,13 +30,11 @@ module.exports = function(Student) {
     const url = `https://api.github.com/users/${username}/repos?access_token=${process.env.GITHUB_TOKEN}`;
     try {
       const res = await axios(url);
-      console.log(res.data);
       const repo = res.data.find(x => x.full_name === `${username}/marvin`);
-      console.log(repo);
       if (!repo) {
         return 'repo not found';
       }
-      return {...res.data, id};
+      return {...res.data[0], id};
     } catch (error) {
       console.log(error.response.data);
       if (error.response.data.message === 'Not Found') {
@@ -55,7 +53,6 @@ module.exports = function(Student) {
   });
 
   Student.afterRemote('checkRepository', async function(ctx, data) {
-    console.log(data);
     const StudentActivity = Student.app.models.StudentActivity;
     const Course = Student.app.models.Course;
     if (typeof data !== 'string') {
@@ -70,7 +67,6 @@ module.exports = function(Student) {
       const activities = course.toJSON().activities;
       console.log(usr, activities);
       usr.activityNumber = 1;
-      usr.XPPoints = 50;
       usr.username = data.owner.login;
       usr.save();
       StudentActivity.create({
