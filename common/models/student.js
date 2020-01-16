@@ -55,6 +55,7 @@ module.exports = function(Student) {
   });
 
   Student.afterRemote('checkRepository', async function(ctx, data) {
+    console.log(data);
     const StudentActivity = Student.app.models.StudentActivity;
     const Course = Student.app.models.Course;
     if (typeof data !== 'string') {
