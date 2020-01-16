@@ -57,8 +57,8 @@ module.exports = function(Student) {
   Student.afterRemote('checkRepository', async function(ctx, data) {
     const StudentActivity = Student.app.models.StudentActivity;
     const Course = Student.app.models.Course;
-    if (!typeof data === 'string') {
-      // console.log(data.id, data.owner.login);
+    if (typeof data !== 'string') {
+      console.log(data.id, data.owner.login);
       const usr = await Student.findById(data.id);
       const course = await Course.findById(usr.courseId, {
         include: 'activities',
@@ -67,7 +67,7 @@ module.exports = function(Student) {
         return;
       }
       const activities = course.toJSON().activities;
-      // console.log(usr, activities);
+      console.log(usr, activities);
       usr.activityNumber = 1;
       usr.XPPoints = 50;
       usr.username = data.owner.login;
@@ -78,7 +78,9 @@ module.exports = function(Student) {
         createdAt: moment().toDate(),
         fails: 0,
       });
-      return;
+      return usr;
+    } else {
+      console.log('is string');
     }
   });
 
@@ -149,6 +151,9 @@ module.exports = function(Student) {
     const auth = await GDrive();
     const folder = await findFolder(auth, path)
     console.log(folder);
+    if (folder[0] && folder[0].reason && folder[0].reason === 'notFound') {
+      throw 'Pasta não encontrada. Verifique as configurações de compartilhiamento';
+    }
     const result = valdiateFolder(folder);
     if (result === true) {
       stu.updateAttributes({ GDriveURL: folder.webViewLink, activityNumber: 1 });
