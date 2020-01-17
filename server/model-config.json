@@ -46,6 +46,7 @@
           "find": true,
           "findById": true,
           "create": true,
+          "listCorrectors": true,
           "createNew": true,
           "prototype.__link__activities": true,
           "prototype.__unlink__activities": true,

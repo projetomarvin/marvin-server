@@ -65,4 +65,50 @@ module.exports = function(Course) {
     };
     sgMail.send(msg);
   });
+
+  function findIndexById(arr, id) {
+    return arr.map((e) => String(e.id)).indexOf(String(id));
+  }
+
+  Course.listCorrectors = async (id) => {
+    const acts = await Course.findById(id, {
+      include: {
+        relation: 'students',
+        scope: {
+          include: {
+            relation: 'corrections',
+            where: {finishedAt: undefined},
+          },
+        },
+      },
+    });
+    const res = acts.toJSON();
+    res.students.forEach((s, i) => {
+      if (s.corrections[0]) {
+        const corr = s.corrections[0];
+        const stuCorrIdx = findIndexById(res.students, corr.correctorId);
+        res.students[stuCorrIdx].corrigindo = s.username || s.email;
+        res.students[i].corrigido_por =
+          res.students[stuCorrIdx].username ||
+          res.students[stuCorrIdx].username;
+      }
+    });
+    return res;
+  };
+
+  Course.remoteMethod('listCorrectors', {
+    accepts: {
+      arg: 'id',
+      type: 'string',
+      required: true,
+    },
+    returns: {
+      arg: 'events',
+      root: true,
+    },
+    http: {
+      path: '/:id/studentsAndCorrections',
+      verb: 'get',
+    },
+  });
 };

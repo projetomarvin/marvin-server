@@ -55,6 +55,7 @@
       "property": [
         "create",
         "find",
+        "listCorrectors",
         "createNew",
         "__create__students",
         "__create__activities",

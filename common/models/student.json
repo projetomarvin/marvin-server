@@ -38,6 +38,9 @@
     },
     "pendingCorrection": {
       "type": "object"
+    },
+    "blocked": {
+      "type": "boolean"
     }
   },
   "validations": [],

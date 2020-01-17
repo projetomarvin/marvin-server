@@ -81,7 +81,7 @@ module.exports = function(Student) {
     }
   });
 
-  Student.linkGithub = async function(token, id) {
+  Student.linkGithub = async function(token, username, id) {
     console.log(id, token);
     const student = await Student.findById(id);
     return axios
@@ -94,7 +94,7 @@ module.exports = function(Student) {
         const authToken = r.data.split('=')[1].split('&')[0];
         console.log(authToken);
         if (authToken !== 'bad_verification_code') {
-          student.updateAttributes({githubAccessToken: authToken});
+          student.updateAttributes({githubAccessToken: authToken, username});
           return authToken;
         } else {
           const err = new Error();
@@ -108,6 +108,11 @@ module.exports = function(Student) {
     accepts: [
       {
         arg: 'token',
+        type: 'string',
+        required: true,
+      },
+      {
+        arg: 'username',
         type: 'string',
         required: true,
       },
