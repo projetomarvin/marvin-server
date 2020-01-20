@@ -77,7 +77,11 @@ module.exports = function(Course) {
         scope: {
           include: {
             relation: 'corrections',
-            where: {finishedAt: undefined},
+            scope: {
+              where: {
+                comment: '',
+              },
+            },
           },
         },
       },
@@ -90,7 +94,7 @@ module.exports = function(Course) {
         res.students[stuCorrIdx].corrigindo = s.username || s.email;
         res.students[i].corrigido_por =
           res.students[stuCorrIdx].username ||
-          res.students[stuCorrIdx].username;
+          res.students[stuCorrIdx].email;
       }
     });
     return res;
