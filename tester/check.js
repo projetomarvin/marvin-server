@@ -17,7 +17,6 @@ function usesFor(txt) {
 
 module.exports = async function(level, param, id) {
   let folder, log;
-  let result = {};
   if (fs.existsSync('/home/ubuntu/activityFiles')) {
     folder = '/home/ubuntu/activityFiles/';
   } else {
