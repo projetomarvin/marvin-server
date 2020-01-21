@@ -8,7 +8,22 @@ function arraysEqual(arr1, arr2) {
 
 module.exports = {
   runTest: async function(fase, id, python) {
-    console.log(fase);
+    const lvl = Number(/fase0(\d)/g.exec(fase[0].path)[1]);
+    console.log(lvl);
+    const normalize = (st) => {
+      if (typeof st !== 'string' || lvl < 3) {
+        return st;
+      }
+      let str = st.toLowerCase();
+      str = str.replace(/[àáâãäå]/, 'a');
+      str = str.replace(/[éèêẽë]/, 'e');
+      str = str.replace(/[íìîĩ]/, 'i');
+      str = str.replace(/[óòôõ]/, 'o');
+      str = str.replace(/[úùũû]/, 'u');
+      str = str.replace(/[ç]/, 'c');
+      return str;
+    };
+
     const run = Promise.all(
       fase.map(async function(e, i) {
         const a = Promise.all(
@@ -78,12 +93,12 @@ module.exports = {
               }
             } else {
               if (
-                (test.output.toString() == t.output &&
-                  test.result === t.result) ||
+                (normalize(test.output.toString()) == normalize(t.output) &&
+                  normalize(test.result) === normalize(t.result)) ||
                 (test.result &&
                   t.result &&
                   arraysEqual(test.result, t.result) &&
-                  test.output.toString() == t.output)
+                  normalize(test.output.toString()) == normalize(t.output))
               ) {
                 answer.correct = true;
                 return answer;
@@ -93,11 +108,11 @@ module.exports = {
                 return answer;
               }
             }
-          })
+          }),
         );
         const b = await a;
         return b;
-      })
+      }),
     );
     const c = await run;
     return c;
