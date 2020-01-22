@@ -246,11 +246,6 @@ module.exports = function(Studentactivity) {
       include: {student: {course: 'students'}},
     });
     let students = sts.toJSON().student.course.students;
-    const prevAct = await Studentactivity.find({
-      where: {studentId: sts.studentId},
-      order: 'createdAt DESC',
-      limit: 2,
-    });
     const currStudent = sts.toJSON().student;
     const list = [];
     const obj = {};
@@ -258,8 +253,7 @@ module.exports = function(Studentactivity) {
       const id = String(item.id);
       return (
         id !== String(sts.studentId) &&
-        new Date(item.availableUntil) > new Date() &&
-        sts.correctorId !== id
+        new Date(item.availableUntil) > new Date()
       );
     });
     let sum = 0;

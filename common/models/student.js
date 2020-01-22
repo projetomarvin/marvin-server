@@ -191,7 +191,7 @@ module.exports = function(Student) {
       ctx.req.body.availableUntil !== 'available'
     ) {
       if (st.availableUntil === 'correction') {
-        throw 'Você está em uma correção';
+        ctx.req.body.availableUntil === 'correction';
       }
     } else if (ctx.req.body.panic === 'true') {
       console.log('coinnnnnnnn');
