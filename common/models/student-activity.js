@@ -247,13 +247,20 @@ module.exports = function(Studentactivity) {
     });
     let students = sts.toJSON().student.course.students;
     const currStudent = sts.toJSON().student;
+    const facilitador = students.find(
+      (s) => s.username.includes('facilitador'),
+    );
+    if (facilitador.forcedCorrections.includes(String(currStudent.id))) {
+      return facilitador.id;
+    }
     const list = [];
     const obj = {};
     students = students.filter(item => {
       const id = String(item.id);
       return (
         id !== String(sts.studentId) &&
-        new Date(item.availableUntil) > new Date()
+        new Date(item.availableUntil) > new Date() &&
+        id !== String(facilitador.id)
       );
     });
     let sum = 0;
@@ -476,10 +483,6 @@ module.exports = function(Studentactivity) {
       let newCurAct = {};
       if (!curAct.correction2Id) newCurAct.correctorId = '';
       else newCurAct.correctorId = '0';
-      if (!curAct.prevCorrectors)
-        newCurAct.prevCorrectors = [corr.correctorId];
-      else
-        newCurAct.prevCorrectors =  [...curAct.prevCorrectors, corr.correctorId];
       newCurAct.finishedAt = 0;
       await stu.updateAttributes({correctionPoints: stu.correctionPoints + 1});
       console.log('update');
@@ -522,7 +525,7 @@ module.exports = function(Studentactivity) {
     let act = JSON.stringify(curAct);
     act = JSON.parse(act);
     const corr = act.corrections.sort((a, b) =>
-      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1
+      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1,
     );
     const lastCorr = corr[corr.length - 1];
     const not = await Notification.findOne({
@@ -540,13 +543,9 @@ module.exports = function(Studentactivity) {
     stu.updateAttributes({availableUntil: 0});
     Correction.destroyById(lastCorr.id, e => console.log(e));
     Notification.destroyById(not.id, e => console.log(e));
-    let newCurAct = {};
+    const newCurAct = {};
     if (!curAct.correction2Id) newCurAct.correctorId = '';
     else newCurAct.corrector2Id = '0';
-    if (!curAct.prevCorrectors)
-      newCurAct.prevCorrectors = [lastCorr.correctorId];
-    else
-      newCurAct.prevCorrectors =  [...curAct.prevCorrectors, lastCorr.correctorId];
     newCurAct.finishedAt = 0;
     console.log(stu.username + ' CANCELOU A CORREÇÃO');
     curAct.updateAttributes(newCurAct, (e, d) => console.log(e, d));
