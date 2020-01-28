@@ -192,11 +192,9 @@ module.exports = function(Student) {
       body.availableUntil !== 'available'
     ) {
       if (st.availableUntil === 'correction') {
-        console.log(111);
         body.availableUntil = 'correction';
       }
     } else if (body.panic === 'true') {
-      console.log('coinnnnnnnn');
       if (st.coins < 420) {
         throw 'Você não tem moedas insuficientes';
       }
