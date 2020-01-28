@@ -247,12 +247,15 @@ module.exports = function(Studentactivity) {
     });
     let students = sts.toJSON().student.course.students;
     const currStudent = sts.toJSON().student;
-    const facilitador = students.find(
+    let facilitador = students.find(
       (s) => s.username.includes('facilitador'),
     );
+
     if (facilitador &&
       facilitador.forcedCorrections.includes(String(currStudent.id))) {
       return facilitador.id;
+    } else {
+      facilitador = '';
     }
     const list = [];
     const obj = {};
