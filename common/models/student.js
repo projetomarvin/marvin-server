@@ -186,19 +186,21 @@ module.exports = function(Student) {
   Student.beforeRemote('prototype.patchAttributes', async function(ctx, data) {
     const uId = ctx.req.accessToken.userId.toJSON();
     const st = await Student.findById(uId);
+    const body = ctx.req.body;
     if (
-      ctx.req.body.availableUntil &&
-      ctx.req.body.availableUntil !== 'available'
+      body.availableUntil &&
+      body.availableUntil !== 'available'
     ) {
       if (st.availableUntil === 'correction') {
-        ctx.req.body.availableUntil === 'correction';
+        console.log(111);
+        body.availableUntil = 'correction';
       }
-    } else if (ctx.req.body.panic === 'true') {
+    } else if (body.panic === 'true') {
       console.log('coinnnnnnnn');
       if (st.coins < 420) {
         throw 'Você não tem moedas insuficientes';
       }
-      ctx.req.body.coins = st.coins - 420;
+      body.coins = st.coins - 420;
     } else {
       return;
     }
