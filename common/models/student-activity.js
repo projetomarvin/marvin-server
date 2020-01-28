@@ -250,7 +250,8 @@ module.exports = function(Studentactivity) {
     const facilitador = students.find(
       (s) => s.username.includes('facilitador'),
     );
-    if (facilitador.forcedCorrections.includes(String(currStudent.id))) {
+    if (facilitador &&
+      facilitador.forcedCorrections.includes(String(currStudent.id))) {
       return facilitador.id;
     }
     const list = [];
