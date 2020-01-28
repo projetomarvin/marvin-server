@@ -402,14 +402,13 @@ module.exports = function(Studentactivity) {
           },
           (err, result) => {
             fs.unlinkSync(`${folder}/${id}.zip`);
-            console.log(err, result);
+            console.log('erro no s3', 'upload feito');
             resolve();
-          }
+          },
         );
       });
       await up;
     }
-    console.log(stActivity.correctorId, stActivity.corrector2Id);
     const stActChanges = {};
     if (!stActivity.correctorId) stActChanges.correctorId = userId;
     else stActChanges.corrector2Id = userId;

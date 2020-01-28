@@ -219,7 +219,7 @@ module.exports = function(Student) {
           },
         }
       )
-      .then(r => console.log(r.data))
+      .then(r => console.log('Salvo no git!'))
       .catch(e => console.log('ERROR', e.response.data));
   }
 
