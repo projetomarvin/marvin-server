@@ -305,6 +305,7 @@ module.exports = function(Correction) {
     ) {
       stuChanges.activityNumber = activity.levelNumber + 1;
       stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
+      stuChanges.passed = true;
       const language = stu.levelNumber > 6 ? 'html' : 'js';
       StudentActivity.create({
         studentId: stu.id,
@@ -333,7 +334,7 @@ module.exports = function(Correction) {
       const newStAct = await StudentActivity.findById(stuAct.id);
       newStAct.updateAttributes(stuActChanges);
     }
-    stu.updateAttributes({...stuChanges, availableUntil: 0});
+    stu.updateAttributes({ ...stuChanges, availableUntil: 0 });
     stuCorr.updateAttributes({
       correctionPoints: stuCorr.correctionPoints + 1,
       availableUntil: 0,
