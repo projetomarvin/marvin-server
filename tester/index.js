@@ -6,6 +6,28 @@ function arraysEqual(arr1, arr2) {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
 
+function parseResult(corr, res) {
+  const lines = [];
+  if (corr.param) {
+    let paramStr = corr.param;
+    if (Array.isArray(corr.param)) {
+      paramStr = corr.param.join(', ');
+    }
+    lines.push(`Testando parâmetro **${paramStr}**`);
+  }
+  if (corr.result !== undefined) {
+    const typeCorr = typeof corr.result;
+    const typeRes = typeof res.result;
+    lines.push(`O resultado esperado era **${corr.result}** (${typeCorr}) ` +
+    `e o obtido foi **${res.result}** (${typeRes})`);
+  }
+  if (corr.output) {
+    lines.push(`O console.log esperado era **${corr.output}** ` +
+    `e o obtido foi **${res.output}**`);
+  }
+  return lines.join('\n');
+}
+
 module.exports = {
   runTest: async function(fase, id, python) {
     const lvl = Number(/fase0(\d)/g.exec(fase[0].path)[1]);
@@ -28,14 +50,14 @@ module.exports = {
       fase.map(async function(e, i) {
         const a = Promise.all(
           e.corrections.map(async t => {
-            let isValid;
+            let isValid,
+              test;
             if (t.result) {
               isValid = Boolean(t.result[0] === '/');
             }
             if (isValid) {
               t.result = t.result.slice(1, -1);
             }
-            let test;
             if (!t.output) t.output = '';
             if (python) {
               test = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
@@ -49,18 +71,9 @@ module.exports = {
             // test.result = eval(test.result);
             const answer = {
               level: i,
-              test:
-                'testando parametro(s) ' +
-                JSON.stringify(t.param) +
-                '\nO resultado esperado era ' +
-                JSON.stringify(t.result) +
-                ' e o obtido foi ' +
-                JSON.stringify(test.result) +
-                '\nO console.log esperado era ' +
-                JSON.stringify(t.output) +
-                ' e o obtido foi ' +
-                JSON.stringify(test.output),
+              test: parseResult(t, test),
             };
+            console.log(answer);
             if (typeof test !== 'object') {
               answer.correct = false;
               answer.test = test;

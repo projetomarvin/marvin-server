@@ -6,17 +6,39 @@ function arraysEqual(arr1, arr2) {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
 
+function parseResult(corr, res) {
+  const lines = [];
+  if (corr.param) {
+    let paramStr = corr.param;
+    if (Array.isArray(corr.param)) {
+      paramStr = corr.param.join(', ');
+    }
+    lines.push(`Testando parâmetro(s) **${paramStr}**`);
+  }
+  if (corr.result) {
+    const typeCorr = typeof corr.result;
+    const typeRes = typeof res.result;
+    lines.push(`O resultado esperado era **${corr.result}** (${typeCorr}) ` +
+    `e o obtido foi **${res.result}** (${typeRes})`);
+  }
+  if (corr.output) {
+    lines.push(`O console.log esperado era **${corr.output}** ` +
+    `e o obtido foi **${res.output}**`);
+  }
+  return lines.join('\n');
+}
+
 async function run(code, name, tests, python) {
   const run = Promise.all(
     tests.map(async (t) => {
-      let isValid;
+      let isValid,
+        test;
       if (t.result) {
         isValid = Boolean(t.result[0] === '/');
       }
       if (isValid) {
         t.result = t.result.slice(1, -1);
       }
-      let test;
       if (!t.output) t.output = '';
       if (python) {
         test = await pyCheck(code, t.param, name);
@@ -28,17 +50,7 @@ async function run(code, name, tests, python) {
       }
       console.log('RESULT', t, test);
       const answer = {
-        test:
-          'testando parametro(s) ' +
-          JSON.stringify(t.param) +
-          '\nO resultado esperado era ' +
-          JSON.stringify(t.result) +
-          ' e o obtido foi ' +
-          JSON.stringify(test.result) +
-          '\nO console.log esperado era ' +
-          JSON.stringify(t.output) +
-          ' e o obtido foi ' +
-          JSON.stringify(test.output),
+        test: parseResult(t, test),
       };
       if (typeof test !== 'object') {
         answer.correct = false;
