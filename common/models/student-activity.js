@@ -255,7 +255,7 @@ module.exports = function(Studentactivity) {
       facilitador.forcedCorrections.includes(String(currStudent.id))) {
       return facilitador.id;
     } else {
-      facilitador = '';
+      facilitador = {id: ''};
     }
     const list = [];
     const obj = {};
