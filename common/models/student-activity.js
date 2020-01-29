@@ -4,7 +4,7 @@ const axios = require('axios');
 const fs = require('fs');
 const {exec, execSync} = require('child_process');
 const AWS = require('aws-sdk');
-const { google } = require('googleapis');
+const {google} = require('googleapis');
 
 const GDrive = require('../../drive/index.js');
 
@@ -28,7 +28,8 @@ module.exports = function(Studentactivity) {
           },
           {relation: 'student'},
         ],
-      });
+      },
+    );
     stActivity = stActivity.toJSON();
     try {
       const data = await Promise.all(
@@ -41,10 +42,10 @@ module.exports = function(Studentactivity) {
           const file = await axios(
             `https://api.github.com/repos/${stActivity.student.username}/marvin/contents/` +
               r.path +
-              '?access_token=' + process.env.GITHUB_TOKEN
+              '?access_token=' + process.env.GITHUB_TOKEN,
           );
           return file.data;
-        })
+        }),
       );
       return data;
     } catch (e) {
@@ -282,15 +283,15 @@ module.exports = function(Studentactivity) {
     });
     console.log('possíveis corretores: ', list);
     list.map(u => {
-      for (var usr in u) {
+      for (const usr in u) {
         if (u.hasOwnProperty(usr)) {
           obj[usr] = u[usr] / sum;
         }
       }
     });
     let sum2 = 0;
-    let r = Math.random();
-    for (var idx in obj) {
+    const r = Math.random();
+    for (const idx in obj) {
       sum2 += obj[idx];
       if (r <= sum2) return idx;
     }
@@ -328,7 +329,8 @@ module.exports = function(Studentactivity) {
             },
           },
         ],
-      });
+      },
+    );
 
     const stu = await Students.findById(stActivity.toJSON().studentId);
     const activity = stActivity.toJSON().activity;
@@ -358,7 +360,7 @@ module.exports = function(Studentactivity) {
           await execSync(`mkdir ${folder}/${id}/${path2}`);
           const commits = await axios(
             `https://api.github.com/repos/${stu.username}/marvin/commits` +
-              '?access_token=' + process.env.GITHUB_TOKEN
+              '?access_token=' + process.env.GITHUB_TOKEN,
           );
           const files = await axios(
             'https://api.github.com/repos/' +
@@ -366,7 +368,7 @@ module.exports = function(Studentactivity) {
               '/marvin/git/trees/' +
               commits.data[0].sha +
               '?recursive=' +
-              '1&access_token=' + process.env.GITHUB_TOKEN
+              '1&access_token=' + process.env.GITHUB_TOKEN,
           );
           const currentFiles = files.data.tree.filter(obj => {
             return obj.mode === '100644' && obj.path === file;
@@ -376,18 +378,18 @@ module.exports = function(Studentactivity) {
               const fileG = await axios(
                 `https://api.github.com/repos/${stu.username}/marvin/contents` +
                   f.path +
-                  '?access_token=' + process.env.GITHUB_TOKEN
+                  '?access_token=' + process.env.GITHUB_TOKEN,
               );
               await fs.writeFileSync(
                 `${folder}/${id}/${f.path}`,
                 fileG.data.content,
-                'base64'
+                'base64',
               );
               codes[file.substring(0, file.length - 3)] = fileG.data.content;
               console.log('file created');
-            })
+            }),
           );
-        })
+        }),
       );
       await execSync(`zip -r ${folder}/${id}.zip ${folder}/${id}`);
       await execSync(`rm -rf ${folder}/${id}`);
@@ -477,13 +479,13 @@ module.exports = function(Studentactivity) {
     if (!corr) {
       throw 'A outra pessoa cancelou a correção!';
     }
-    const curAct = await Studentactivity.findById(corr.studentActivityId); //Dando pau aqui quando cancela correcao
+    const curAct = await Studentactivity.findById(corr.studentActivityId); // Dando pau aqui quando cancela correcao
     const stu = await Student.findById(curAct.studentId);
     if (data.answer === 'false') {
       const not = await Notification.findOne({
         where: {targetURL: `/correcao.html?${id}`},
       });
-      let newCurAct = {};
+      const newCurAct = {};
       if (!curAct.correction2Id) newCurAct.correctorId = '';
       else newCurAct.correctorId = '0';
       newCurAct.finishedAt = 0;
@@ -502,7 +504,7 @@ module.exports = function(Studentactivity) {
   Studentactivity.remoteMethod('answerCorrectionInvite', {
     accepts: [
       {
-        arg: 'req', type: 'object', http: { source: 'req' }
+        arg: 'req', type: 'object', http: {source: 'req'},
       },
       {
         arg: 'id', type: 'string', required: true,
@@ -528,8 +530,7 @@ module.exports = function(Studentactivity) {
     let act = JSON.stringify(curAct);
     act = JSON.parse(act);
     const corr = act.corrections.sort((a, b) =>
-      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1,
-    );
+      new Date(a.createdAt) < new Date(b.createdAt) ? -1 : 1);
     const lastCorr = corr[corr.length - 1];
     const not = await Notification.findOne({
       where: {targetURL: `/correcao.html?${lastCorr.id}`},

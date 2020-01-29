@@ -1,8 +1,9 @@
+/* eslint-disable camelcase */
 'use strict';
 const axios = require('axios');
 const moment = require('moment');
 const sgMail = require('@sendgrid/mail');
-const { google } = require('googleapis');
+const {google} = require('googleapis');
 
 const dryRun = require('../../tester/singleTest.js');
 const GDrive = require('../../drive/index.js');
@@ -127,13 +128,13 @@ module.exports = function(Student) {
     http: {path: '/:id/linkGithub', verb: 'post'},
   });
 
-  function valdiateFolder(folder){
-    if (!folder.name.includes("Marvin Sheets - ")) {
+  function valdiateFolder(folder) {
+    if (!folder.name.includes('Marvin Sheets - ')) {
       return new Error('Nome da pasta inválido');
     } else {
       return true;
     }
-  };
+  }
 
   async function findFolder(auth, url) {
     const drive = google.drive({version: 'v3', auth});
@@ -142,7 +143,7 @@ module.exports = function(Student) {
         fileId: url,
         fields: '*',
       });
-      return (result.data);
+      return result.data;
     } catch (error) {
       return error.errors;
     }
@@ -151,21 +152,22 @@ module.exports = function(Student) {
   Student.linkGDrive = async (path, id) => {
     const stu = await Student.findById(id);
     const auth = await GDrive();
-    const folder = await findFolder(auth, path)
+    const folder = await findFolder(auth, path);
     console.log(folder);
     if (folder[0] && folder[0].reason && folder[0].reason === 'notFound') {
-      throw 'Pasta não encontrada. Verifique as configurações de compartilhiamento';
+      throw 'Pasta não encontrada. ' +
+        'Verifique as configurações de compartilhiamento';
     }
     const result = valdiateFolder(folder);
     if (result === true) {
-      stu.updateAttributes({ GDriveURL: folder.webViewLink, activityNumber: 1 });
+      stu.updateAttributes({GDriveURL: folder.webViewLink, activityNumber: 1});
       return true;
     } else {
       throw result;
     }
-  }
+  };
 
- Student.remoteMethod('linkGDrive', {
+  Student.remoteMethod('linkGDrive', {
     accepts: [
       {
         arg: 'url',
@@ -187,10 +189,7 @@ module.exports = function(Student) {
     const uId = ctx.req.accessToken.userId.toJSON();
     const st = await Student.findById(uId);
     const body = ctx.req.body;
-    if (
-      body.availableUntil &&
-      body.availableUntil !== 'available'
-    ) {
+    if (body.availableUntil && body.availableUntil !== 'available') {
       if (st.availableUntil === 'correction') {
         body.availableUntil = 'correction';
       }
@@ -217,7 +216,7 @@ module.exports = function(Student) {
           headers: {
             Authorization: 'token ' + usr.githubAccessToken,
           },
-        }
+        },
       )
       .then(r => console.log('Salvo no git!'))
       .catch(e => console.log('ERROR', e.response.data));
@@ -240,7 +239,7 @@ module.exports = function(Student) {
         headers: {
           Authorization: 'token ' + usr.githubAccessToken,
         },
-      }
+      },
     )
       .then(r => {
         gitPush(usr, data, r.data.sha);
@@ -312,23 +311,26 @@ module.exports = function(Student) {
     http: {path: '/:id/username', verb: 'get'},
   });
 
-  Student.showPending = async function (id) {
-    const sts = await Student.find({ where: {
-      courseId: id,
-    }, include: {
-      relation: 'studentActivities',
-      scope: {
-        where: {finishedAt: {neq: null}},
-        include: {
-          relation: 'corrections',
-          scope: {
-            where: {marvinCorrection: undefined}
-          }
-        }
-      }
-    }});
+  Student.showPending = async function(id) {
+    const sts = await Student.find({
+      where: {
+        courseId: id,
+      },
+      include: {
+        relation: 'studentActivities',
+        scope: {
+          where: {finishedAt: {neq: null}},
+          include: {
+            relation: 'corrections',
+            scope: {
+              where: {marvinCorrection: undefined},
+            },
+          },
+        },
+      },
+    });
     return sts;
-  }
+  };
 
   Student.remoteMethod('showPending', {
     accepts: [
@@ -444,7 +446,7 @@ module.exports = function(Student) {
     const stu = await Student.findById(id);
     const changes = {};
     if (!stu.dice) {
-      throw "Você não tem mais dados para jogar :/"
+      throw 'Você não tem mais dados para jogar :/';
     }
     changes.dice = false;
     switch (result) {
@@ -455,7 +457,7 @@ module.exports = function(Student) {
       case 2:
         changes.correctionPoints = stu.correctionPoints - 1;
         break;
-        
+
       case 3:
         changes.coins = stu.coins + 47;
         break;
@@ -520,25 +522,25 @@ module.exports = function(Student) {
     http: {path: '/:id/transferCoins', verb: 'put'},
   });
 
-  Student.dryRun = async function (fk, {code, id}) {
+  Student.dryRun = async function(fk, {code, id}) {
     const stu = await Student.findById(id);
     const Exercise = Student.app.models.Exercise;
     const ex = await Exercise.findById(fk);
     const functionName = /\/([a-z1-9]+?)\./gi.exec(ex.path)[1];
     if (stu.coins < 100) {
-      throw "Moedas insuficientes!"
+      throw 'Moedas insuficientes!';
     }
     const result = await dryRun(code, functionName, ex.corrections);
     await stu.updateAttributes({coins: stu.coins - 100});
     return result;
-  }
+  };
 
   Student.remoteMethod('dryRun', {
     accepts: [
-      { arg: 'fk', type: 'string', required: true },
-      { arg: 'data', type: 'object', http: { source: 'body', },  required: true, },
+      {arg: 'fk', type: 'string', required: true},
+      {arg: 'data', type: 'object', http: {source: 'body'}, required: true},
     ],
-    returns: { arg: 'events', root: true },
-    http: { path: '/:fk/dryRun', verb: 'post' },
+    returns: {arg: 'events', root: true},
+    http: {path: '/:fk/dryRun', verb: 'post'},
   });
 };

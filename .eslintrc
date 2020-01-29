@@ -1,6 +1,6 @@
 {
-  "extends": "loopback",
+  "extends": ["loopback"],
   "parserOptions": {
-        "ecmaVersion": 2017
-    }
+    "ecmaVersion": 2018
+  }
 }

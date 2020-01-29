@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 'use strict';
 const {google} = require('googleapis');
 
@@ -7,7 +8,7 @@ const credentials = require('./credentials.json');
 async function auth() {
   const {client_secret, client_id, redirect_uris} = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
-    client_id, client_secret, redirect_uris[0]
+    client_id, client_secret, redirect_uris[0],
   );
   oAuth2Client.setCredentials(token);
 
@@ -28,5 +29,3 @@ async function listFiles(auth, url) {
 }
 
 module.exports = auth;
-
-// checkFolder('1tW9CfsG9nhNnkOSG_W0aTNmZCBJCqbdA').then(r => console.log(r));

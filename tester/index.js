@@ -18,12 +18,16 @@ function parseResult(corr, res) {
   if (corr.result !== undefined) {
     const typeCorr = typeof corr.result;
     const typeRes = typeof res.result;
-    lines.push(`O resultado esperado era **${corr.result}** (${typeCorr}) ` +
-    `e o obtido foi **${res.result}** (${typeRes})`);
+    lines.push(
+      `O resultado esperado era **${corr.result}** (${typeCorr}) ` +
+        `e o obtido foi **${res.result}** (${typeRes})`,
+    );
   }
   if (corr.output) {
-    lines.push(`O console.log esperado era **${corr.output}** ` +
-    `e o obtido foi **${res.output}**`);
+    lines.push(
+      `O console.log esperado era **${corr.output}** ` +
+        `e o obtido foi **${res.output}**`,
+    );
   }
   return lines.join('\n');
 }
@@ -32,7 +36,7 @@ module.exports = {
   runTest: async function(fase, id, python) {
     const lvl = Number(/fase0(\d)/g.exec(fase[0].path)[1]);
     console.log(lvl);
-    const normalize = (st) => {
+    const normalize = st => {
       if (typeof st !== 'string' || lvl < 3) {
         return st;
       }
@@ -50,8 +54,7 @@ module.exports = {
       fase.map(async function(e, i) {
         const a = Promise.all(
           e.corrections.map(async t => {
-            let isValid,
-              test;
+            let isValid, test;
             if (t.result) {
               isValid = Boolean(t.result[0] === '/');
             }
@@ -60,15 +63,18 @@ module.exports = {
             }
             if (!t.output) t.output = '';
             if (python) {
-              test = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
+              test = await pyCheck(
+                e.path.substring(0, e.path.length - 2) + 'py',
+                t.param,
+                id,
+              );
             } else {
               test = await check(e.path, t.param, id); // for JS
             }
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
             }
-	          console.log('RESULT', t, test);
-            // test.result = eval(test.result);
+            console.log('RESULT', t, test);
             const answer = {
               level: i,
               test: parseResult(t, test),
@@ -81,16 +87,22 @@ module.exports = {
             } else if (isValid) {
               let test2, test3;
               if (python) {
-                test2 = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
-                test3 = await pyCheck(e.path.substring(0, e.path.length - 2) + 'py', t.param, id);
+                test2 = await pyCheck(
+                  e.path.substring(0, e.path.length - 2) + 'py',
+                  t.param,
+                  id,
+                );
+                test3 = await pyCheck(
+                  e.path.substring(0, e.path.length - 2) + 'py',
+                  t.param,
+                  id,
+                );
               } else {
                 test2 = await check(e.path, t.param, id);
                 test3 = await check(e.path, t.param, id);
               }
-              answer.test += '\nOutros resultados:\n' +
-              test2.result +
-              ', ' +
-              test3.result;
+              answer.test +=
+                '\nOutros resultados:\n' + test2.result + ', ' + test3.result;
               if (
                 t.result &&
                 test.output.toString() === t.output &&

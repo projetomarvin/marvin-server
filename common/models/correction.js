@@ -18,7 +18,7 @@ module.exports = function(Correction) {
   Correction.beforeRemote('prototype.patchAttributes', function(
     ctx,
     data,
-    next
+    next,
   ) {
     const body = ctx.req.body;
     body.correctedAt = moment().toDate();
@@ -27,46 +27,57 @@ module.exports = function(Correction) {
 
   Correction.afterRemote('prototype.patchAttributes', async function(
     ctx,
-    data
+    data,
   ) {
     const StudentActivity = Correction.app.models.StudentActivity;
     const Student = Correction.app.models.Student;
     const Notification = Correction.app.models.Notification;
-    const stuAct = await StudentActivity.findById(
-      data.studentActivityId, {
-        include: {
-          activity: 'exercises'
-        }
-      });
+    const stuAct = await StudentActivity.findById(data.studentActivityId, {
+      include: {
+        activity: 'exercises',
+      },
+    });
 
     const corr = await Correction.findById(data.id);
     const act = stuAct.toJSON().activity;
     const stCorr = await Student.findById(corr.correctorId);
     const prevMsg = await Notification.findOne({
-      where: {or: [{targetURL: `correcao.html?${data.id}`}, {targetURL: `/correcao.html?${data.id}`}]},
+      where: {
+        or: [
+          {targetURL: `correcao.html?${data.id}`},
+          {targetURL: `/correcao.html?${data.id}`},
+        ],
+      },
     });
-    if (!data.excel && !act.exercises[0].corrections && !stuAct.corrector2Id && stuAct.correctorId) {
+    if (
+      !data.excel &&
+      !act.exercises[0].corrections &&
+      !stuAct.corrector2Id &&
+      stuAct.correctorId
+    ) {
       stuAct.updateAttributes({corrector2Id: 0});
-      stCorr.updateAttributes({correctionPoints: stCorr.correctionPoints + 1, availableUntil: 0});
+      stCorr.updateAttributes({
+        correctionPoints: stCorr.correctionPoints + 1,
+        availableUntil: 0,
+      });
     }
     if (prevMsg) {
       prevMsg.destroy();
     }
   });
 
-  Correction.finishExcel = async function (id) {
-    const correction = await Correction.findById(
-      id,
-      {include: {
+  Correction.finishExcel = async function(id) {
+    const correction = await Correction.findById(id, {
+      include: {
         relation: 'studentActivity',
         scope: {
-          include: 'activity'
-        }
-      } })
+          include: 'activity',
+        },
+      },
+    });
     const corr = correction.toJSON();
-    if (!corr.marvinCorrector || !corr.correctedAt)
-      return true;
-    let corrects =  0;
+    if (!corr.marvinCorrector || !corr.correctedAt) return true;
+    let corrects = 0;
     let matchingCorrections = 0;
     for (const question in corr.marvinCorrector) {
       if (corr.marvinCorrector.hasOwnProperty(question)) {
@@ -80,7 +91,8 @@ module.exports = function(Correction) {
       }
     }
     const finalGrade = corrects / corr.studentActivity.activity.excelExNumber;
-    const fullMatch = corr.studentActivity.activity.excelExNumber === matchingCorrections;
+    const fullMatch =
+      corr.studentActivity.activity.excelExNumber === matchingCorrections;
     await correction.updateAttributes({
       grade: finalGrade,
       started: false,
@@ -89,8 +101,8 @@ module.exports = function(Correction) {
       corr,
       fullMatch,
       finalGrade,
-    }
-  }
+    };
+  };
 
   Correction.afterRemote('finishExcel', async (ctx, data) => {
     if (!data.corr) {
@@ -148,11 +160,11 @@ module.exports = function(Correction) {
     },
   });
 
-  Correction.excelMarvinCorrection = async function (id, data) {
+  Correction.excelMarvinCorrection = async function(id, data) {
     const corr = await Correction.findById(id);
     const updated = await corr.updateAttributes(data);
     return updated;
-  }
+  };
 
   Correction.remoteMethod('excelMarvinCorrection', {
     accepts: [
@@ -180,8 +192,8 @@ module.exports = function(Correction) {
 
   Correction.finishCorrection = async function(id) {
     const correction = await Correction.findById(id, {
-      include: 
-        {studentActivity: {
+      include: {
+        studentActivity: {
           activity: 'exercises',
         },
       },
@@ -191,13 +203,11 @@ module.exports = function(Correction) {
     let file;
     try {
       file = await axios({
-        url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${
-          corr.studentActivityId
-        }.zip`,
+        url: `https://s3-sa-east-1.amazonaws.com/marvin-files/${corr.studentActivityId}.zip`,
         responseType: 'stream',
       });
     } catch (error) {
-      console.log("Algo deu errado", error.response);
+      console.log('Algo deu errado', error.response);
       throw error;
     }
     const writeFile = new Promise(resolve => {
@@ -207,11 +217,11 @@ module.exports = function(Correction) {
             __dirname +
               '/../../../activityFiles/' +
               corr.studentActivity.id +
-              '.zip'
+              '.zip',
           )
           .on('finish', () => {
             resolve();
-          })
+          }),
       );
     });
     await writeFile;
@@ -223,27 +233,30 @@ module.exports = function(Correction) {
         ' -d ' +
         __dirname +
         '/../../../activityFiles/' +
-        corr.studentActivity.id
+        corr.studentActivity.id,
     );
     await execSync(
       'rm ' +
         __dirname +
         '/../../../activityFiles/' +
         corr.studentActivity.id +
-        '.zip'
+        '.zip',
     );
     const correctionTest = await check.runTest(
       corr.studentActivity.activity.exercises,
       corr.studentActivity.id,
-      corr.studentActivity.language === 'py'
+      corr.studentActivity.language === 'py',
     );
     await execSync(
-      'rm -rf ' + __dirname + '/../../../activityFiles/' + corr.studentActivity.id
+      'rm -rf ' +
+        __dirname +
+        '/../../../activityFiles/' +
+        corr.studentActivity.id,
     );
     let lastRight = 0;
     let errou = false;
     let correctionmsg = '';
-    let autocorrectionCheck = {};
+    const autocorrectionCheck = {};
     correctionTest.forEach((lvl, i) => {
       correctionmsg += `Exercício ${lvl[0].level}:\n`;
       const lvlName = `ex0${i}`;
@@ -255,7 +268,8 @@ module.exports = function(Correction) {
           autocorrectionCheck[lvlName] = false;
         } else {
           correctionmsg += 'CERTO! \n\n';
-          if (autocorrectionCheck[lvlName] !== false) autocorrectionCheck[lvlName] = true;
+          if (autocorrectionCheck[lvlName] !== false)
+            autocorrectionCheck[lvlName] = true;
         }
       });
       if (!errou) {
@@ -290,9 +304,9 @@ module.exports = function(Correction) {
       where: {
         courseId: activity.courseId,
         levelNumber: activity.levelNumber + 1,
-      }
+      },
     });
-    
+
     let precision = 0;
     const stuChanges = {};
     const stuActChanges = {};
@@ -300,9 +314,7 @@ module.exports = function(Correction) {
       stuActChanges.finishedAt = undefined;
       stuActChanges.correctorId = undefined;
       stuActChanges.fails = stuAct.fails + 1;
-    } else if (
-      data.grade >= activity.minGrade
-    ) {
+    } else if (data.grade >= activity.minGrade) {
       stuChanges.activityNumber = activity.levelNumber + 1;
       stuChanges.coins = stu.coins + (50 - 8 * stuAct.fails);
       stuChanges.passed = true;
@@ -319,22 +331,22 @@ module.exports = function(Correction) {
       stuActChanges.correctorId = null;
       stuActChanges.fails = stuAct.fails + 1;
     }
-    for (let i in data.autocorrectionCheck) {
+    for (const i in data.autocorrectionCheck) {
       if (data.autocorrectionCheck[i] === corr[i]) {
         precision += 1 / activity.exercises.length;
       }
     }
     let precisionCoins = 0;
     if (precision > 0.999) {
-      precisionCoins = 30
+      precisionCoins = 30;
     }
 
     if (stuActChanges.fails) {
-      console.log("err");
+      console.log('err');
       const newStAct = await StudentActivity.findById(stuAct.id);
       newStAct.updateAttributes(stuActChanges);
     }
-    stu.updateAttributes({ ...stuChanges, availableUntil: 0 });
+    stu.updateAttributes({...stuChanges, availableUntil: 0});
     stuCorr.updateAttributes({
       correctionPoints: stuCorr.correctionPoints + 1,
       availableUntil: 0,
@@ -373,7 +385,7 @@ module.exports = function(Correction) {
     const stuCorr = await Student.findById(corr.correctorId);
     await stu.updateAttributes({availableUntil: 'correction'});
     await stuCorr.updateAttributes({availableUntil: 'correction'});
-    await corr.updateAttributes({ started: true });
+    await corr.updateAttributes({started: true});
   };
 
   Correction.remoteMethod('startCorrection', {
@@ -405,10 +417,10 @@ module.exports = function(Correction) {
       });
       const ex = corr.toJSON().corrections.reverse();
       const corrs = [ex[0], ex[1]];
-      let results = {};
+      const results = {};
       let cheat;
       corrs.map(c => {
-        for (var ex in c) {
+        for (const ex in c) {
           if (ex.match(/ex\d\d/g)) {
             if (c[ex].works === 'Não') results[ex] = c[ex].works;
             else if (results[ex] !== 'Não') {
@@ -423,7 +435,7 @@ module.exports = function(Correction) {
       console.log(results);
       let exs = 0;
       let right = 0;
-      for (var t in results) {
+      for (const t in results) {
         exs++;
         if (results[t] === 'Sim') right++;
       }
@@ -450,7 +462,7 @@ module.exports = function(Correction) {
     const stuAct = await StudentActivity.findById(corr.id);
     const course = stu.toJSON();
     let finalMsg;
-    let stuChanges = {availableUntil: 0};
+    const stuChanges = {availableUntil: 0};
     if (data.cheat) {
       finalMsg =
         '<b>A pessoa que te corrigiu indicou que você burlou as regras' +
@@ -474,7 +486,7 @@ module.exports = function(Correction) {
         activityId: course.course.activities[stuChanges.activityNumber].id,
         createdAt: moment().toDate(),
         fails: 0,
-        language: 'html'
+        language: 'html',
       });
     } else {
       finalMsg =
@@ -503,8 +515,8 @@ module.exports = function(Correction) {
       ${finalMsg}
       <br>
       O link do arquivo e https://s3-sa-east-1.amazonaws.com/marvin-files/${
-        stuAct.id
-      }.zip
+  stuAct.id
+}.zip
       </p>`,
     };
     Notification.create({
@@ -539,14 +551,10 @@ module.exports = function(Correction) {
       where: {
         and: [
           {grade: {gt: -1}},
-          {or: [
-            {studentId: id},
-            {correctorId: id},
-            {correcto2Id: id},
-          ]}
-        ]
+          {or: [{studentId: id}, {correctorId: id}, {correcto2Id: id}]},
+        ],
       },
-      include: 'studentActivity'
+      include: 'studentActivity',
     });
     return corrs;
   };
@@ -567,21 +575,21 @@ module.exports = function(Correction) {
     },
   });
 
-  Correction.dryRun = async function (fk, {code}) {
+  Correction.dryRun = async function(fk, {code}) {
     const Exercise = Correction.app.models.Exercise;
     const ex = await Exercise.findById(fk);
     const functionName = /\/([a-z1-9]+?)\./gi.exec(ex.path)[1];
     const result = await dryRun(code, functionName, ex.corrections);
 
     return result;
-  }
+  };
 
   Correction.remoteMethod('dryRun', {
     accepts: [
-      { arg: 'fk', type: 'string', required: true },
-      { arg: 'code', type: 'object', http: { source: 'body', },  required: true, },
+      {arg: 'fk', type: 'string', required: true},
+      {arg: 'code', type: 'object', http: {source: 'body'}, required: true},
     ],
-    returns: { arg: 'events', root: true },
-    http: { path: '/:fk/dryRun', verb: 'post' },
+    returns: {arg: 'events', root: true},
+    http: {path: '/:fk/dryRun', verb: 'post'},
   });
 };

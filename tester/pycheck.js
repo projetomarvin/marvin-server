@@ -17,7 +17,7 @@ function usesFor(txt) {
 
 module.exports = async function(level, param, id) {
   let folder, log, body;
-  let result = {};
+  const result = {};
   if (fs.existsSync('/home/ubuntu/activityFiles')) {
     folder = '/home/ubuntu/activityFiles/';
   } else {
@@ -44,17 +44,20 @@ module.exports = async function(level, param, id) {
   // const functionFile = file.match(/(fun.*{[\s\S]*}[\s]*$)/g);
   // if (!functionFile) return 'Função inválida!';
   if (usesFor(file[0])) return 'Uso de laço for identificado';
-  let  functionIvk = levelName + '(' + String(params) + ')';
+  let functionIvk = levelName + '(' + String(params) + ')';
   functionIvk = functionIvk.replace(/true/g, 'True').replace(/false/g, 'False');
   console.log(file, functionIvk);
-  const res = await axios.post('https://demoapi.projetomarvin.com/api/pythonCode/evaluate', {
-    code: file,
-    function: functionIvk,
-  });
+  const res = await axios.post(
+    'https://demoapi.projetomarvin.com/api/pythonCode/evaluate',
+    {
+      code: file,
+      function: functionIvk,
+    },
+  );
   if (res.data.errorMessage) {
     body = 'Erro não especificado';
   } else {
-    body =  JSON.parse(res.data.body);
+    body = JSON.parse(res.data.body);
   }
   if (body.result === null) {
     body.result = undefined;

@@ -18,21 +18,24 @@ function parseResult(corr, res) {
   if (corr.result) {
     const typeCorr = typeof corr.result;
     const typeRes = typeof res.result;
-    lines.push(`O resultado esperado era **${corr.result}** (${typeCorr}) ` +
-    `e o obtido foi **${res.result}** (${typeRes})`);
+    lines.push(
+      `O resultado esperado era **${corr.result}** (${typeCorr}) ` +
+        `e o obtido foi **${res.result}** (${typeRes})`,
+    );
   }
   if (corr.output) {
-    lines.push(`O console.log esperado era **${corr.output}** ` +
-    `e o obtido foi **${res.output}**`);
+    lines.push(
+      `O console.log esperado era **${corr.output}** ` +
+        `e o obtido foi **${res.output}**`,
+    );
   }
   return lines.join('\n');
 }
 
 async function run(code, name, tests, python) {
   const run = Promise.all(
-    tests.map(async (t) => {
-      let isValid,
-        test;
+    tests.map(async t => {
+      let isValid, test;
       if (t.result) {
         isValid = Boolean(t.result[0] === '/');
       }
@@ -65,10 +68,8 @@ async function run(code, name, tests, python) {
           test2 = await check(code, t.param, name);
           test3 = await check(code, t.param, name);
         }
-        answer.test += '\nOutros resultados:\n' +
-        test2.result +
-        ', ' +
-        test3.result;
+        answer.test +=
+          '\nOutros resultados:\n' + test2.result + ', ' + test3.result;
         if (
           t.result &&
           test.output.toString() === t.output &&
