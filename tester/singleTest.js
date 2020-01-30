@@ -15,7 +15,7 @@ function parseResult(corr, res) {
     }
     lines.push(`Testando parâmetro(s) **${paramStr}**`);
   }
-  if (corr.result) {
+  if (corr.result !== undefined) {
     const typeCorr = typeof corr.result;
     const typeRes = typeof res.result;
     lines.push(
