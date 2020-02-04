@@ -248,16 +248,16 @@ module.exports = function(Studentactivity) {
     });
     let students = sts.toJSON().student.course.students;
     const currStudent = sts.toJSON().student;
-    let facilitador = students.find(
-      (s) => s.username.includes('facilitador'),
-    );
+    // let facilitador = students.find(
+    //   (s) => s.username.includes('facilitador'),
+    // );
 
-    if (facilitador &&
-      facilitador.forcedCorrections.includes(String(currStudent.id))) {
-      return facilitador.id;
-    } else {
-      facilitador = {id: ''};
-    }
+    // if (facilitador &&
+    //   facilitador.forcedCorrections.includes(String(currStudent.id))) {
+    //   return facilitador.id;
+    // } else {
+    //   facilitador = {id: ''};
+    // }
     const list = [];
     const obj = {};
     students = students.filter(item => {
