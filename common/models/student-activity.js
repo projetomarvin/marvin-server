@@ -264,8 +264,7 @@ module.exports = function(Studentactivity) {
       const id = String(item.id);
       return (
         id !== String(sts.studentId) &&
-        new Date(item.availableUntil) > new Date() &&
-        id !== String(facilitador.id)
+        new Date(item.availableUntil) > new Date()
       );
     });
     let sum = 0;
