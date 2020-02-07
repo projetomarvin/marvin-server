@@ -6,6 +6,14 @@ function arraysEqual(arr1, arr2) {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
 
+function parse(txt) {
+  if (typeof txt === 'object') {
+    return JSON.stringify(txt);
+  } else {
+    return txt;
+  }
+}
+
 function parseResult(corr, res) {
   const lines = [];
   if (corr.param) {
@@ -13,43 +21,43 @@ function parseResult(corr, res) {
     if (Array.isArray(corr.param)) {
       paramStr = corr.param.join(', ');
     }
-    lines.push(`Testando parâmetro **${paramStr}**`);
+    lines.push(`Testando parâmetro **${parse(paramStr)}**`);
   }
   if (corr.result !== undefined) {
     const typeCorr = typeof corr.result;
     const typeRes = typeof res.result;
     lines.push(
-      `O resultado esperado era **${corr.result}** (${typeCorr}) ` +
-        `e o obtido foi **${res.result}** (${typeRes})`,
+      `O resultado esperado era **${parse(corr.result)}** (${typeCorr}) ` +
+        `e o obtido foi **${parse(res.result)}** (${typeRes})`,
     );
   }
   if (corr.output) {
     lines.push(
-      `O console.log esperado era **${corr.output}** ` +
-        `e o obtido foi **${res.output}**`,
+      `O console.log esperado era **${parse(corr.output)}** ` +
+        `e o obtido foi **${parse(res.output)}**`,
     );
   }
   return lines.join('\n');
 }
 
+const normalize = st => {
+  if (typeof st !== 'string' || lvl < 3) {
+    return st;
+  }
+  let str = st.toLowerCase();
+  str = str.replace(/[àáâãäå]/, 'a');
+  str = str.replace(/[éèêẽë]/, 'e');
+  str = str.replace(/[íìîĩ]/, 'i');
+  str = str.replace(/[óòôõ]/, 'o');
+  str = str.replace(/[úùũû]/, 'u');
+  str = str.replace(/[ç]/, 'c');
+  return str;
+};
+
 module.exports = {
   runTest: async function(fase, id, python) {
     const lvl = Number(/fase0(\d)/g.exec(fase[0].path)[1]);
     console.log(lvl);
-    const normalize = st => {
-      if (typeof st !== 'string' || lvl < 3) {
-        return st;
-      }
-      let str = st.toLowerCase();
-      str = str.replace(/[àáâãäå]/, 'a');
-      str = str.replace(/[éèêẽë]/, 'e');
-      str = str.replace(/[íìîĩ]/, 'i');
-      str = str.replace(/[óòôõ]/, 'o');
-      str = str.replace(/[úùũû]/, 'u');
-      str = str.replace(/[ç]/, 'c');
-      return str;
-    };
-
     const run = Promise.all(
       fase.map(async function(e, i) {
         const a = Promise.all(
@@ -116,22 +124,19 @@ module.exports = {
                 answer.correct = false;
                 return answer;
               }
+            } else if (
+              (normalize(test.output.toString()) == normalize(t.output) &&
+                normalize(test.result) === normalize(t.result)) ||
+              (test.result &&
+                t.result &&
+                arraysEqual(test.result, t.result) &&
+                arraysEqual(test.output.toString()), t.output)
+            ) {
+              answer.correct = true;
+              return answer;
             } else {
-              if (
-                (normalize(test.output.toString()) == normalize(t.output) &&
-                  normalize(test.result) === normalize(t.result)) ||
-                (test.result &&
-                  t.result &&
-                  arraysEqual(test.result, t.result) &&
-                  normalize(test.output.toString()) == normalize(t.output))
-              ) {
-                answer.correct = true;
-                return answer;
-              } else {
-                // console.log(Array.isArray(t.result), Array.isArray(test.result));
-                answer.correct = false;
-                return answer;
-              }
+              answer.correct = false;
+              return answer;
             }
           }),
         );
