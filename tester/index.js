@@ -2,6 +2,8 @@
 const check = require('./check.js');
 const pyCheck = require('./pycheck.js');
 
+let lvl;
+
 function arraysEqual(arr1, arr2) {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 }
@@ -40,7 +42,7 @@ function parseResult(corr, res) {
   return lines.join('\n');
 }
 
-const normalize = st => {
+const normalize = (st) => {
   if (typeof st !== 'string' || lvl < 3) {
     return st;
   }
@@ -56,7 +58,7 @@ const normalize = st => {
 
 module.exports = {
   runTest: async function(fase, id, python) {
-    const lvl = Number(/fase0(\d)/g.exec(fase[0].path)[1]);
+    lvl = Number(/fase0(\d)/g.exec(fase[0].path)[1]);
     console.log(lvl);
     const run = Promise.all(
       fase.map(async function(e, i) {
