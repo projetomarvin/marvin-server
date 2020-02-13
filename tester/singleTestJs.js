@@ -39,7 +39,7 @@ module.exports = async function(code, param, name) {
   try {
     log = vm.run(
       'let output = [], console = {log: function(msg) ' +
-        '{ output.push(msg) }}; (function() { return {' +
+        '{ output.push(String(msg)) }}; (function() { return {' +
         'output, result: eval(userScript)} })();',
     );
   } catch (e) {
