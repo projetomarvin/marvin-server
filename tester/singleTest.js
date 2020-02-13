@@ -32,6 +32,20 @@ function parseResult(corr, res) {
   return lines.join('\n');
 }
 
+const normalize = st => {
+  if (typeof st !== 'string') {
+    return st;
+  }
+  let str = st.toLowerCase();
+  str = str.replace(/[àáâãäå]/, 'a');
+  str = str.replace(/[éèêẽë]/, 'e');
+  str = str.replace(/[íìîĩ]/, 'i');
+  str = str.replace(/[óòôõ]/, 'o');
+  str = str.replace(/[úùũû]/, 'u');
+  str = str.replace(/[ç]/, 'c');
+  return str;
+};
+
 async function run(code, name, tests, python) {
   const run = Promise.all(
     tests.map(async t => {
@@ -83,28 +97,28 @@ async function run(code, name, tests, python) {
           answer.correct = false;
           return answer;
         }
-      } else {
-        if (
-          (test.output.toString() == t.output && test.result === t.result) ||
-          (test.result &&
-            t.result &&
-            arraysEqual(test.result, t.result) &&
-            test.output.toString() == t.output)
-        ) {
-          answer.correct = true;
-          return answer;
-        } else if (
+      } else if (
+        (test.output.toString() == t.output && test.result === t.result) ||
+        (test.result &&
           t.result &&
-          t.result.test &&
-          test.output.toString() === t.output &&
-          t.result.test(test.result)
-        ) {
-          answer.correct = true;
-          return answer;
-        } else {
-          answer.correct = false;
-          return answer;
-        }
+          arraysEqual(test.result, t.result) &&
+          test.output.toString() == t.output)
+      ) {
+        answer.correct = true;
+        return answer;
+      } else if (
+        (normalize(test.output.toString()) == normalize(t.output) &&
+          normalize(test.result) === normalize(t.result)) ||
+        (test.result &&
+          t.result &&
+          arraysEqual(test.result, t.result) &&
+          arraysEqual(test.output.toString()), t.output)
+          ) {
+        answer.correct = true;
+        return answer;
+      } else {
+        answer.correct = false;
+        return answer;
       }
     }),
   );
