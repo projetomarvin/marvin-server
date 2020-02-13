@@ -20,6 +20,9 @@ function parseResult(corr, res) {
   const lines = [];
   if (corr.param) {
     let paramStr = corr.param;
+    if (Array.isArray(corr.param)) {
+      paramStr = corr.param.join(', ');
+    }
     lines.push(`Testando parâmetro **${parse(paramStr)}**`);
   }
   if (corr.result !== undefined) {
@@ -129,7 +132,7 @@ module.exports = {
               (test.result &&
                 t.result &&
                 arraysEqual(test.result, t.result) &&
-                arraysEqual(test.output, t.output))
+                arraysEqual(test.output.toString(), t.output))
             ) {
               answer.correct = true;
               return answer;
