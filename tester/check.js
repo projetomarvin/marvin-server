@@ -50,7 +50,7 @@ module.exports = async function(level, param, id) {
   // FIXME: Colocar try catch aqui pra gerenciar erro
   try {
     log = vm.run(
-      'let output = [], console = {log: function(msg) { output.push(msg) }};' +
+      'let output = [], console = {log: function(msg) { output.push(String(msg)) }};' +
       ' (function() { return {output, result: eval(userScript)} })();',
     );
   } catch (e) {

@@ -5,7 +5,9 @@ const pyCheck = require('./pycheck.js');
 let lvl;
 
 function arraysEqual(arr1, arr2) {
-  return JSON.stringify(arr1) === JSON.stringify(arr2);
+  const str1 = JSON.stringify(arr1);
+  const str2 = JSON.stringify(arr2);
+  return str1 === str2;
 }
 
 function parse(txt) {
@@ -42,7 +44,7 @@ function parseResult(corr, res) {
   return lines.join('\n');
 }
 
-const normalize = (st) => {
+const normalize = st => {
   if (typeof st !== 'string' || lvl < 3) {
     return st;
   }
@@ -84,17 +86,18 @@ module.exports = {
             if (Array.isArray(test.output) && test.output.length === 1) {
               test.output = test.output.join();
             }
-            console.log('RESULT', t, test);
+            console.log('TESTING', t);
             const answer = {
               level: i,
               test: parseResult(t, test),
             };
-            console.log(answer);
+            // console.log(answer);
             if (typeof test !== 'object') {
               answer.correct = false;
               answer.test = test;
               return answer;
             } else if (isValid) {
+              console.log('UM');
               let test2, test3;
               if (python) {
                 test2 = await pyCheck(
@@ -127,16 +130,26 @@ module.exports = {
                 return answer;
               }
             } else if (
-              (normalize(test.output.toString()) == normalize(t.output) &&
+              (normalize(test.output) == normalize(t.output) &&
                 normalize(test.result) === normalize(t.result)) ||
               (test.result &&
                 t.result &&
                 arraysEqual(test.result, t.result) &&
-                arraysEqual(test.output.toString(), t.output))
+                arraysEqual(test.output, t.output))
             ) {
+              console.log('SEGUNDO');
+              answer.correct = true;
+              return answer;
+            } else if (
+              Array.isArray(t.output) &&
+              !t.result &&
+              arraysEqual(test.output, t.output)
+            ) {
+              console.log('TERCEIRO');
               answer.correct = true;
               return answer;
             } else {
+              console.log('QUARTO');
               answer.correct = false;
               return answer;
             }
