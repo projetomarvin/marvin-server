@@ -6,7 +6,7 @@ const {exec, execSync} = require('child_process');
 const AWS = require('aws-sdk');
 const {google} = require('googleapis');
 
-const GDrive = require('../../drive/index.js');
+// const GDrive = require('../../drive/index.js');
 
 const credentials = new AWS.SharedIniFileCredentials({profile: 'cori'});
 
@@ -113,41 +113,41 @@ module.exports = function(Studentactivity) {
     return file;
   }
 
-  Studentactivity.checkFilesDrive = async (id) => {
-    let stActivity = await Studentactivity.findById(
-      id, {
-        include: ['student', 'activity'],
-      },
-    );
-    stActivity = stActivity.toJSON();
-    const folderId = stActivity.student.GDriveURL.slice(39);
-    const auth = await GDrive();
-    const filesOnFolder = await listFiles(auth, folderId);
-    const file = valdiateFile(filesOnFolder, stActivity.activity.excelFileName);
-    if (!file) {
-      const err = new Error();
-      err.statusCode = 404;
-      err.message = 'file not found ' + stActivity.activity.excelFileName;
-      throw err;
-    }
-    return file;
-  };
+  // Studentactivity.checkFilesDrive = async (id) => {
+  //   let stActivity = await Studentactivity.findById(
+  //     id, {
+  //       include: ['student', 'activity'],
+  //     },
+  //   );
+  //   stActivity = stActivity.toJSON();
+  //   const folderId = stActivity.student.GDriveURL.slice(39);
+  //   const auth = await GDrive();
+  //   const filesOnFolder = await listFiles(auth, folderId);
+  //   const file = valdiateFile(filesOnFolder, stActivity.activity.excelFileName);
+  //   if (!file) {
+  //     const err = new Error();
+  //     err.statusCode = 404;
+  //     err.message = 'file not found ' + stActivity.activity.excelFileName;
+  //     throw err;
+  //   }
+  //   return file;
+  // };
 
-  Studentactivity.remoteMethod('checkFilesDrive', {
-    accepts: {
-      arg: 'id',
-      type: 'string',
-      required: true,
-    },
-    returns: {
-      arg: 'events',
-      root: true,
-    },
-    http: {
-      path: '/:id/excel/checkFiles',
-      verb: 'get',
-    },
-  });
+  // Studentactivity.remoteMethod('checkFilesDrive', {
+  //   accepts: {
+  //     arg: 'id',
+  //     type: 'string',
+  //     required: true,
+  //   },
+  //   returns: {
+  //     arg: 'events',
+  //     root: true,
+  //   },
+  //   http: {
+  //     path: '/:id/excel/checkFiles',
+  //     verb: 'get',
+  //   },
+  // });
 
   Studentactivity.beforeRemote('excelFinish', async function(ctx) {
     const id = ctx.req.params.id;

@@ -6,7 +6,7 @@ const sgMail = require('@sendgrid/mail');
 const {google} = require('googleapis');
 
 const dryRun = require('../../tester/singleTest.js');
-const GDrive = require('../../drive/index.js');
+// const GDrive = require('../../drive/index.js');
 const sgKey = process.env.SENDGRID_API_KEY;
 
 module.exports = function(Student) {
@@ -28,9 +28,13 @@ module.exports = function(Student) {
   });
 
   Student.checkRepository = async function(username, id) {
-    const url = `https://api.github.com/users/${username}/repos?access_token=${process.env.GITHUB_TOKEN}`;
+    const url = `https://api.github.com/users/${username}/repos`;
     try {
-      const res = await axios(url);
+      const res = await axios.get(url, {
+        Headers: {
+          Authorization: `token ${process.env.GITHUB_TOKEN}`,
+        },
+      });
       const repo = res.data.find(x => x.full_name === `${username}/marvin`);
       if (!repo) {
         return 'repo not found';
@@ -87,8 +91,8 @@ module.exports = function(Student) {
     const student = await Student.findById(id);
     return axios
       .post('https://github.com/login/oauth/access_token', {
-        client_id: '71f8116e373c16f3eb11',
-        client_secret: '963642187139722787a001456c34002985a9f22c',
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
         code: token,
       })
       .then(r => {
@@ -149,41 +153,41 @@ module.exports = function(Student) {
     }
   }
 
-  Student.linkGDrive = async (path, id) => {
-    const stu = await Student.findById(id);
-    const auth = await GDrive();
-    const folder = await findFolder(auth, path);
-    console.log(folder);
-    if (folder[0] && folder[0].reason && folder[0].reason === 'notFound') {
-      throw 'Pasta não encontrada. ' +
-        'Verifique as configurações de compartilhiamento';
-    }
-    const result = valdiateFolder(folder);
-    if (result === true) {
-      stu.updateAttributes({GDriveURL: folder.webViewLink, activityNumber: 1});
-      return true;
-    } else {
-      throw result;
-    }
-  };
+  // Student.linkGDrive = async (path, id) => {
+  //   const stu = await Student.findById(id);
+  //   const auth = await GDrive();
+  //   const folder = await findFolder(auth, path);
+  //   console.log(folder);
+  //   if (folder[0] && folder[0].reason && folder[0].reason === 'notFound') {
+  //     throw 'Pasta não encontrada. ' +
+  //       'Verifique as configurações de compartilhiamento';
+  //   }
+  //   const result = valdiateFolder(folder);
+  //   if (result === true) {
+  //     stu.updateAttributes({GDriveURL: folder.webViewLink, activityNumber: 1});
+  //     return true;
+  //   } else {
+  //     throw result;
+  //   }
+  // };
 
-  Student.remoteMethod('linkGDrive', {
-    accepts: [
-      {
-        arg: 'url',
-        type: 'string',
-        required: true,
-      },
-      {
-        arg: 'id',
-        type: 'string',
-        required: true,
-      },
-    ],
-    returns: {root: true},
-    description: 'Validate Google Drive folder',
-    http: {path: '/:id/checkDrievFolder', verb: 'post'},
-  });
+  // Student.remoteMethod('linkGDrive', {
+  //   accepts: [
+  //     {
+  //       arg: 'url',
+  //       type: 'string',
+  //       required: true,
+  //     },
+  //     {
+  //       arg: 'id',
+  //       type: 'string',
+  //       required: true,
+  //     },
+  //   ],
+  //   returns: {root: true},
+  //   description: 'Validate Google Drive folder',
+  //   http: {path: '/:id/checkDrievFolder', verb: 'post'},
+  // });
 
   Student.beforeRemote('prototype.patchAttributes', async function(ctx, data) {
     const uId = ctx.req.accessToken.userId.toJSON();
